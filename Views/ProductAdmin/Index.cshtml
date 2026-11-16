@@ -1,0 +1,498 @@
+﻿
+@model System.Data.DataTable
+@using System
+@using System.Data
+
+@{
+    ViewBag.Title = "Quản lý sản phẩm";
+    Layout = null;
+
+    int totalProducts = Model == null ? 0 : Model.Rows.Count;
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1" />
+
+    <title>Quản lý sản phẩm - MINI SHOP &amp; LUXURY</title>
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #f5f5f5;
+            color: #111;
+            font-family: Arial, sans-serif;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            height: 100vh;
+            padding: 28px 18px;
+            background: #101010;
+            color: white;
+        }
+
+        .brand {
+            text-align: center;
+            font-size: 21px;
+            font-weight: bold;
+            line-height: 1.5;
+            letter-spacing: 2px;
+            margin-bottom: 40px;
+        }
+
+            .brand small {
+                display: block;
+                color: #aaa;
+                font-size: 12px;
+                font-weight: normal;
+            }
+
+        .menu a {
+            display: block;
+            color: #ddd;
+            text-decoration: none;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 7px;
+            font-size: 14px;
+        }
+
+            .menu a i {
+                width: 24px;
+            }
+
+            .menu a:hover,
+            .menu a.active {
+                background: #fff;
+                color: #111;
+            }
+
+        .main {
+            margin-left: 250px;
+            padding: 35px;
+        }
+
+        .heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 28px;
+        }
+
+        h1 {
+            margin: 0 0 8px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            margin: 0;
+            color: #777;
+            font-size: 14px;
+        }
+
+        .add-btn {
+            display: inline-block;
+            background: #111;
+            color: white;
+            padding: 13px 20px;
+            text-decoration: none;
+            border-radius: 7px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+            .add-btn:hover {
+                background: #333;
+            }
+
+        .panel {
+            background: #fff;
+            border: 1px solid #e5e5e5;
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        .panel-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+            .panel-title h2 {
+                margin: 0;
+                font-size: 20px;
+            }
+
+        .count {
+            font-size: 14px;
+            color: #777;
+        }
+
+        .table-wrap {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #f7f7f7;
+            color: #444;
+            font-size: 13px;
+            text-align: left;
+        }
+
+        th, td {
+            padding: 15px 12px;
+            border-bottom: 1px solid #eee;
+            vertical-align: middle;
+        }
+
+        td {
+            font-size: 14px;
+        }
+
+        .product-img {
+            width: 65px;
+            height: 75px;
+            object-fit: cover;
+            background: #eee;
+            border-radius: 6px;
+        }
+
+        .product-name {
+            font-weight: bold;
+        }
+
+        .price {
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 7px 11px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+
+        .status-on {
+            background: #e5f4e8;
+            color: #23733b;
+        }
+
+        .status-off {
+            background: #eee;
+            color: #666;
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .edit-btn,
+        .delete-btn {
+            padding: 9px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .edit-btn {
+            background: #111;
+            color: #fff;
+            border: 1px solid #111;
+        }
+
+        .delete-btn {
+            background: #fff;
+            color: #b42323;
+            border: 1px solid #b42323;
+        }
+
+            .delete-btn:hover {
+                background: #b42323;
+                color: white;
+            }
+
+        .empty {
+            text-align: center;
+            padding: 65px 20px;
+            color: #777;
+        }
+
+            .empty i {
+                font-size: 45px;
+                margin-bottom: 15px;
+            }
+
+            .empty h3 {
+                color: #111;
+            }
+
+        @@media (max-width: 850px) {
+            .sidebar {
+                position: static;
+                width: 100%;
+                height: auto;
+            }
+
+            .main {
+                margin-left: 0;
+                padding: 20px;
+            }
+
+            .heading {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <aside class="sidebar">
+        <div class="brand">
+            MINI SHOP
+            <br />
+            &amp; LUXURY
+            <small>ADMIN PANEL</small>
+        </div>
+
+        <nav class="menu">
+            <a href="@Url.Action("Index", "Admin")">
+                <i class="fa-solid fa-gauge-high"></i>
+                Tổng quan
+            </a>
+
+            <a href="@Url.Action("Index", "CategoryAdmin")">
+                <i class="fa-solid fa-list"></i>
+                Quản lý danh mục
+            </a>
+
+            <a class="active" href="@Url.Action("Index", "ProductAdmin")">
+                <i class="fa-solid fa-box"></i>
+                Quản lý sản phẩm
+            </a>
+
+            <a href="@Url.Action("Index", "OrderAdmin")">
+                <i class="fa-solid fa-receipt"></i>
+                Quản lý đơn hàng
+            </a>
+
+            <a href="@Url.Action("Index", "Home")">
+                <i class="fa-solid fa-store"></i>
+                Đi đến trang bán hàng
+            </a>
+
+            <a href="@Url.Action("Logout", "Account")" style="margin-top: 28px; border-top: 1px solid #333; padding-top: 22px;">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                Đăng xuất
+            </a>
+        </nav>
+    </aside>
+
+    <main class="main">
+        <div class="heading">
+            <div>
+                <h1>Quản lý sản phẩm</h1>
+                <p class="subtitle">
+                    Danh sách sản phẩm được lưu trong SQL Server.
+                </p>
+            </div>
+
+            <a class="add-btn"
+               href="@Url.Action("Create", "ProductAdmin")">
+                <i class="fa-solid fa-plus"></i>
+                Thêm sản phẩm
+            </a>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">
+                <h2>Danh sách sản phẩm</h2>
+                <span class="count">
+                    Tổng cộng: @totalProducts sản phẩm
+                </span>
+            </div>
+
+            @if (totalProducts == 0)
+            {
+                <div class="empty">
+                    <i class="fa-solid fa-box-open"></i>
+                    <h3>Chưa có sản phẩm nào</h3>
+                    <p>
+                        Nhấn nút Thêm sản phẩm để tạo sản phẩm đầu tiên.
+                    </p>
+                </div>
+            }
+            else
+            {
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Mã</th>
+                                <th>Ảnh</th>
+                                <th>Tên sản phẩm</th>
+                                <th>Danh mục</th>
+                                <th>Giá</th>
+                                <th>Tồn kho</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (DataRow product in Model.Rows)
+                            {
+                                int id = Convert.ToInt32(
+                                    product["ProductId"]);
+
+                                string name = Convert.ToString(
+                                    product["ProductName"]);
+
+                                string category = Convert.ToString(
+                                    product["CategoryName"]);
+
+                                decimal price = Convert.ToDecimal(
+                                    product["Price"]);
+
+                                int stock = Convert.ToInt32(
+                                    product["StockQuantity"]);
+
+                                bool active = Convert.ToBoolean(
+                                    product["IsActive"]);
+
+                                string imageUrl =
+                                    product["ImageUrl"] == DBNull.Value
+                                    ? ""
+                                    : Convert.ToString(
+                                        product["ImageUrl"]).Trim();
+
+                                string imagePath =
+                                    Url.Content("~/Content/logo.png");
+
+                                if (!string.IsNullOrWhiteSpace(imageUrl))
+                                {
+                                    if (imageUrl.StartsWith("~/"))
+                                    {
+                                        imagePath = Url.Content(imageUrl);
+                                    }
+                                    else if (
+                                        imageUrl.StartsWith("/") ||
+                                        imageUrl.StartsWith("http://",
+                                            StringComparison.OrdinalIgnoreCase) ||
+                                        imageUrl.StartsWith("https://",
+                                            StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        imagePath = imageUrl;
+                                    }
+                                    else
+                                    {
+                                        imagePath = Url.Content(
+                                            "~/Content/images san_pham/" +
+                                            imageUrl);
+                                    }
+                                }
+
+                                <tr>
+                                    <td>#@id</td>
+
+                                    <td>
+                                        <img class="product-img"
+                                             src="@imagePath"
+                                             alt="@name" />
+                                    </td>
+
+                                    <td class="product-name">
+                                        @name
+                                    </td>
+
+                                    <td>@category</td>
+
+                                    <td class="price">
+                                        @price.ToString("N0") ₫
+                                    </td>
+
+                                    <td>@stock</td>
+
+                                    <td>
+                                        @if (active)
+                                        {
+                                            <span class="status status-on">
+                                                Đang bán
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="status status-off">
+                                                Đã ẩn
+                                            </span>
+                                        }
+                                    </td>
+
+                                    <td>
+                                        <div class="actions">
+                                            <a class="edit-btn"
+                                               href="@Url.Action(
+                                                   "Edit",
+                                                   "ProductAdmin",
+                                                   new { id = id })">
+                                                <i class="fa-solid fa-pen"></i>
+                                                Sửa
+                                            </a>
+
+                                            @using (Html.BeginForm(
+                                                "Delete",
+                                                "ProductAdmin",
+                                                new { id = id },
+                                                FormMethod.Post,
+                                                new
+                                                {
+                                                    onsubmit = "return confirm('Bạn chắc chắn muốn xóa sản phẩm này?');"
+                                                }))
+                                            {
+                                                @Html.AntiForgeryToken()
+
+                                                <button class="delete-btn"
+                                                        type="submit">
+                                                    <i class="fa-solid fa-trash"></i>
+                                                    Xóa
+                                                </button>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </main>
+</body>
+</html>

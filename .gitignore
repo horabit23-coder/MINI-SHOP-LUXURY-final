@@ -1,0 +1,12 @@
+
+.vs/
+**/bin/
+**/obj/
+packages/
+TestResults/
+*.user
+*.suo
+*.cache
+*.log
+Thumbs.db
+desktop.ini

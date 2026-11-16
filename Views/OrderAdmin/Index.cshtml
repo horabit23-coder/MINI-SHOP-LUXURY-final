@@ -1,0 +1,455 @@
+﻿
+@model System.Data.DataTable
+@using System
+@using System.Data
+
+@{
+    ViewBag.Title = "Quản lý đơn hàng";
+    Layout = null;
+    int total = Model == null ? 0 : Model.Rows.Count;
+
+    string[] statuses = {
+        "Chờ xác nhận",
+        "Đã xác nhận",
+        "Đang giao",
+        "Hoàn thành",
+        "Đã hủy"
+    };
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Quản lý đơn hàng - MINI SHOP &amp; LUXURY</title>
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #f5f5f5;
+            color: #111;
+            font-family: Arial, sans-serif;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            height: 100vh;
+            background: #101010;
+            color: #fff;
+            padding: 28px 18px;
+        }
+
+        .brand {
+            text-align: center;
+            font-size: 21px;
+            font-weight: bold;
+            line-height: 1.5;
+            letter-spacing: 2px;
+            margin-bottom: 40px;
+        }
+
+            .brand small {
+                display: block;
+                color: #aaa;
+                font-size: 12px;
+                font-weight: normal;
+            }
+
+        .menu a {
+            display: block;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 7px;
+            color: #ddd;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+            .menu a i {
+                width: 24px;
+            }
+
+            .menu a:hover,
+            .menu a.active {
+                background: #fff;
+                color: #111;
+            }
+
+        .menu-divider {
+            height: 1px;
+            background: #333;
+            margin: 24px 0 14px;
+        }
+
+        .main {
+            margin-left: 250px;
+            padding: 35px;
+        }
+
+        h1 {
+            margin: 0 0 8px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #777;
+            font-size: 14px;
+            margin-bottom: 28px;
+        }
+
+        .panel {
+            background: #fff;
+            border: 1px solid #e5e5e5;
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        .panel-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+            .panel-heading h2 {
+                margin: 0;
+                font-size: 20px;
+            }
+
+        .count {
+            color: #777;
+            font-size: 14px;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 15px 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+            vertical-align: middle;
+        }
+
+        th {
+            background: #f7f7f7;
+            color: #555;
+            font-size: 13px;
+        }
+
+        .price {
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .status-select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 13px;
+            background: white;
+            min-width: 140px;
+        }
+
+        .status-form {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 13px;
+            border-radius: 6px;
+            font-size: 13px;
+            text-decoration: none;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .btn-save {
+            background: #111;
+            border: 1px solid #111;
+            color: #fff;
+        }
+
+        .btn-detail {
+            background: white;
+            border: 1px solid #111;
+            color: #111;
+        }
+
+        .notice {
+            padding: 14px 16px;
+            border-radius: 7px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .success {
+            background: #e5f4e8;
+            color: #23733b;
+        }
+
+        .error {
+            background: #fdeaea;
+            color: #b42323;
+        }
+
+        .empty {
+            padding: 65px 20px;
+            text-align: center;
+            color: #777;
+        }
+
+            .empty i {
+                font-size: 45px;
+                margin-bottom: 15px;
+            }
+
+            .empty h3 {
+                color: #111;
+            }
+
+        @@media (max-width: 850px) {
+            .sidebar {
+                position: static;
+                width: 100%;
+                height: auto;
+            }
+
+            .main {
+                margin-left: 0;
+                padding: 20px;
+            }
+
+            .panel-heading {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <aside class="sidebar">
+
+        <div class="brand">
+            MINI SHOP
+            <br />
+            &amp; LUXURY
+            <small>ADMIN PANEL</small>
+        </div>
+
+        <nav class="menu">
+
+            <a href="@Url.Action("Index", "Admin")">
+                <i class="fa-solid fa-gauge-high"></i>
+                Tổng quan
+            </a>
+
+            <a href="@Url.Action("Index", "CategoryAdmin")">
+                <i class="fa-solid fa-list"></i>
+                Quản lý danh mục
+            </a>
+
+            <a href="@Url.Action("Index", "ProductAdmin")">
+                <i class="fa-solid fa-box"></i>
+                Quản lý sản phẩm
+            </a>
+
+            <a class="active"
+               href="@Url.Action("Index", "OrderAdmin")">
+                <i class="fa-solid fa-receipt"></i>
+                Quản lý đơn hàng
+            </a>
+
+            <a href="@Url.Action("Index", "Home")">
+                <i class="fa-solid fa-store"></i>
+                Đi đến trang bán hàng
+            </a>
+
+            <div class="menu-divider"></div>
+            <a href="@Url.Action("Logout", "Account")">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                Đăng xuất
+            </a>
+        </nav>
+
+    </aside>
+
+    <main class="main">
+
+        <h1>Quản lý đơn hàng</h1>
+
+        <p class="subtitle">
+            Theo dõi và cập nhật trạng thái đơn hàng.
+        </p>
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="notice success">
+                @TempData["Success"]
+            </div>
+        }
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="notice error">
+                @TempData["Error"]
+            </div>
+        }
+
+        <div class="panel">
+
+            <div class="panel-heading">
+                <h2>Danh sách đơn hàng</h2>
+                <span class="count">Tổng cộng: @total đơn hàng</span>
+            </div>
+
+            @if (total == 0)
+            {
+                <div class="empty">
+
+                    <i class="fa-solid fa-receipt"></i>
+
+                    <h3>Chưa có đơn hàng nào</h3>
+
+                    <p>
+                        Khi chức năng đặt hàng được kết nối
+                        với SQL Server, đơn hàng của khách
+                        sẽ xuất hiện tại đây.
+                    </p>
+
+                </div>
+            }
+            else
+            {
+                <div class="table-wrap">
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Mã đơn</th>
+                                <th>Khách hàng</th>
+                                <th>Số điện thoại</th>
+                                <th>Ngày đặt</th>
+                                <th>Tổng tiền</th>
+                                <th>Trạng thái</th>
+                                <th>Chi tiết</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            @foreach (DataRow order in Model.Rows)
+                            {
+                                int id = Convert.ToInt32(order["OrderId"]);
+
+                                string customerName =
+                                    Convert.ToString(order["CustomerName"]);
+
+                                string phone =
+                                    Convert.ToString(order["Phone"]);
+
+                                decimal amount =
+                                    Convert.ToDecimal(order["TotalAmount"]);
+
+                                string currentStatus =
+                                    Convert.ToString(order["OrderStatus"]);
+
+                                DateTime created =
+                                    Convert.ToDateTime(order["CreatedAt"]);
+
+                                <tr>
+
+                                    <td><strong>#@id</strong></td>
+
+                                    <td>@customerName</td>
+
+                                    <td>@phone</td>
+
+                                    <td>
+                                        @created.ToString("dd/MM/yyyy HH:mm")
+                                    </td>
+
+                                    <td class="price">
+                                        @amount.ToString("N0") ₫
+                                    </td>
+
+                                    <td>
+
+                                        @using (Html.BeginForm(
+                                            "UpdateStatus",
+                                            "OrderAdmin",
+                                            new { id = id },
+                                            FormMethod.Post,
+                                            new { @class = "status-form" }))
+                                        {
+                                            @Html.AntiForgeryToken()
+
+                                            <select class="status-select"
+                                                    name="orderStatus">
+
+                                                @foreach (string status in statuses)
+                                                {
+                                                    <option value="@status"
+                                                            selected="@(status == currentStatus ? "selected" : null)">
+                                                        @status
+                                                    </option>
+                                                }
+
+                                            </select>
+
+                                            <button class="btn btn-save"
+                                                    type="submit">
+                                                Lưu
+                                            </button>
+                                        }
+
+                                    </td>
+
+                                    <td>
+
+                                        <a class="btn btn-detail"
+                                           href="@Url.Action("Details", "OrderAdmin", new { id = id })">
+                                            <i class="fa-solid fa-eye"></i>
+                                            Xem
+                                        </a>
+
+                                    </td>
+
+                                </tr>
+                            }
+
+                        </tbody>
+                    </table>
+
+                </div>
+            }
+
+        </div>
+
+    </main>
+
+</body>
+</html>

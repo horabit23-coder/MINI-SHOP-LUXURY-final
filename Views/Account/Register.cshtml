@@ -1,0 +1,289 @@
+
+@model MINI_SHOP_LUXURY.Models.RegisterViewModel
+
+@{
+    Layout = null;
+    ViewBag.Title = "Dang ky tai khoan";
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>MINI SHOP & LUXURY - Dang ky</title>
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f7f5ef;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 25px;
+        }
+
+        .register-box {
+            width: 100%;
+            max-width: 500px;
+            background: white;
+            padding: 38px;
+            border-radius: 15px;
+            box-shadow: 0 10px 35px rgba(0,0,0,.09);
+        }
+
+        .logo {
+            text-align: center;
+            color: #bd9633;
+            font-size: 25px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #171717;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #888;
+            margin-bottom: 28px;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        input[type="text"],
+        input[type="tel"],
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 13px 14px;
+            border: 1px solid #ddd;
+            border-radius: 7px;
+            font-size: 15px;
+            outline: none;
+            background: white;
+        }
+
+        input:focus {
+            border-color: #bd9633;
+            box-shadow: 0 0 0 2px #bd963322;
+        }
+
+        input::placeholder {
+            color: #999;
+        }
+
+        .error {
+            color: #d62828;
+            font-size: 13px;
+            display: block;
+            margin-top: 6px;
+        }
+
+        .field-validation-error {
+            color: #d62828;
+            font-size: 13px;
+            display: block;
+            margin-top: 6px;
+        }
+
+        .field-validation-valid {
+            display: none;
+        }
+
+        .validation-summary-valid {
+            display: none !important;
+        }
+
+        .validation-summary-errors {
+            background: #fff0f0;
+            color: #c62828;
+            padding: 12px;
+            border-radius: 7px;
+            margin-bottom: 15px;
+            font-size: 13px;
+        }
+
+            .validation-summary-errors ul {
+                margin: 0;
+                padding-left: 20px;
+            }
+
+        .register-btn {
+            width: 100%;
+            padding: 15px;
+            background: #111;
+            color: #d4af37;
+            border: none;
+            border-radius: 7px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+            .register-btn:hover {
+                background: #bd9633;
+                color: #111;
+            }
+
+        .back-home {
+            display: block;
+            text-align: center;
+            margin-top: 22px;
+            text-decoration: none;
+            color: #99751e;
+            font-size: 14px;
+        }
+
+            .back-home:hover {
+                text-decoration: underline;
+            }
+
+        @@media(max-width: 500px) {
+            .register-box {
+                padding: 25px 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="register-box">
+
+        <div class="logo">
+            <i class="fa-solid fa-crown"></i>
+            MINI SHOP & LUXURY
+        </div>
+
+        <h2>T&#7840;O T&#192;I KHO&#7842;N</h2>
+
+        <p class="subtitle">
+            &#272;&#259;ng k&#253; &#273;&#7875; tr&#7843;i nghi&#7879;m mua s&#7855;m c&#249;ng ch&#250;ng t&#244;i
+        </p>
+
+        @using (Html.BeginForm("Register", "Account", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+
+            @Html.ValidationSummary(false, "", new { @class = "validation-summary-errors" })
+
+            <div class="form-group">
+                <label>H&#7885; v&#224; t&#234;n *</label>
+
+                @Html.TextBoxFor(m => m.FullName, new
+                {
+                    placeholder = "Nhap ho va ten",
+                    maxlength = "100",
+                    required = "required",
+                    autocomplete = "name"
+                })
+
+                @Html.ValidationMessageFor(m => m.FullName, "", new { @class = "field-validation-error" })
+            </div>
+
+            <div class="form-group">
+                <label>S&#7889; &#273;i&#7879;n tho&#7841;i *</label>
+
+                @Html.TextBoxFor(m => m.Phone, new
+                {
+                    type = "tel",
+                    placeholder = "Nhap dung 10 chu so",
+                    maxlength = "10",
+                    minlength = "10",
+                    pattern = "[0-9]{10}",
+                    inputmode = "numeric",
+                    autocomplete = "tel",
+                    required = "required",
+                    oninput = "this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)"
+                })
+
+                @Html.ValidationMessageFor(m => m.Phone, "", new { @class = "field-validation-error" })
+            </div>
+
+            <div class="form-group">
+                <label>Email *</label>
+
+                @Html.TextBoxFor(m => m.Email, new
+                {
+                    type = "email",
+                    placeholder = "example@gmail.com",
+                    maxlength = "254",
+                    autocomplete = "email",
+                    required = "required",
+                    pattern = "[A-Za-z0-9._%+-]+@@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}",
+                    oninput = "this.value=this.value.replace(/\\s/g,'')"
+                })
+
+                @Html.ValidationMessageFor(m => m.Email, "", new { @class = "field-validation-error" })
+            </div>
+
+            <div class="form-group">
+                <label>M&#7853;t kh&#7849;u *</label>
+
+                @Html.PasswordFor(m => m.Password, new
+                {
+                    placeholder = "Toi thieu 8 ky tu",
+                    minlength = "8",
+                    maxlength = "100",
+                    autocomplete = "new-password",
+                    required = "required"
+                })
+
+                @Html.ValidationMessageFor(m => m.Password, "", new { @class = "field-validation-error" })
+            </div>
+
+            <div class="form-group">
+                <label>X&#225;c nh&#7853;n m&#7853;t kh&#7849;u *</label>
+
+                @Html.PasswordFor(m => m.ConfirmPassword, new
+                {
+                    placeholder = "Nhap lai mat khau",
+                    minlength = "8",
+                    maxlength = "100",
+                    autocomplete = "new-password",
+                    required = "required"
+                })
+
+                @Html.ValidationMessageFor(m => m.ConfirmPassword, "", new { @class = "field-validation-error" })
+            </div>
+    
+            <button type="submit" class="register-btn">
+                <i class="fa-solid fa-user-plus"></i>
+                &#272;&#258;NG K&#221; NGAY
+            </button>
+        }
+
+        <a href="@Url.Action("Index", "Home")" class="back-home">
+            <i class="fa-solid fa-arrow-left"></i>
+            Quay l&#7841;i trang ch&#7911;
+        </a>
+
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,81 @@
+
+@{
+    Layout = null;
+    ViewBag.Title = "Dang ky thanh cong";
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>&#272;&#259;ng k&#253; th&#224;nh c&#244;ng</title>
+
+    <style>
+        body {
+            margin: 0;
+            background: #f7f5ef;
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .success-box {
+            background: white;
+            padding: 45px 35px;
+            border-radius: 15px;
+            text-align: center;
+            max-width: 480px;
+            width: 100%;
+            box-shadow: 0 10px 35px #0001;
+        }
+
+        .success-icon {
+            font-size: 65px;
+            color: #bd9633;
+        }
+
+        h2 {
+            color: #111;
+        }
+
+        p {
+            color: #777;
+            line-height: 1.7;
+        }
+
+        a {
+            display: inline-block;
+            margin-top: 20px;
+            background: #111;
+            color: #d4af37;
+            padding: 14px 30px;
+            border-radius: 7px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="success-box">
+        <div class="success-icon">&#10004;</div>
+
+        <h2>&#272;&#258;NG K&#221; TH&#192;NH C&#212;NG!</h2>
+
+        <p>
+            T&#224;i kho&#7843;n c&#7911;a b&#7841;n
+            &#273;&#227; &#273;&#432;&#7907;c t&#7841;o th&#224;nh c&#244;ng.
+        </p>
+
+        <a href="@Url.Action("Index", "Home")">
+            V&#7873; trang ch&#7911;
+        </a>
+    </div>
+</body>
+</html>

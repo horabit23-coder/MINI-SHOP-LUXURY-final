@@ -1,0 +1,1396 @@
+﻿
+@{
+    ViewBag.Title = "MINI SHOP & LUXURY";
+    Layout = null;
+
+    bool isLoggedIn = Session["CustomerId"] != null;
+    string customerName = Convert.ToString(Session["CustomerName"] ?? "");
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MINI SHOP &amp; LUXURY</title>
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f8f7f4;
+            color: #222;
+        }
+
+            body.modal-open {
+                overflow: hidden;
+            }
+
+        header {
+            background: #111;
+            color: #d4af37;
+            padding: 18px 6%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo {
+            color: #d4af37;
+            font-size: 25px;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .header-icons {
+            display: flex;
+            align-items: center;
+            gap: 22px;
+            flex-wrap: wrap;
+        }
+
+            .header-icons a {
+                color: #d4af37;
+                font-size: 21px;
+                text-decoration: none;
+                position: relative;
+            }
+
+                .header-icons a:hover {
+                    color: white;
+                }
+
+        .cart-count {
+            position: absolute;
+            top: -11px;
+            right: -12px;
+            background: #d4af37;
+            color: #111;
+            border-radius: 50%;
+            padding: 3px 6px;
+            font-size: 11px;
+        }
+
+        .account-name {
+            color: #fff;
+            font-size: 13px;
+            font-weight: bold;
+            max-width: 170px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .my-account-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            border: 1px solid #fff;
+            border-radius: 5px;
+            padding: 9px 12px;
+            color: #fff;
+            font-size: 12px !important;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+            .my-account-link:hover {
+                background: #fff;
+                color: #111 !important;
+            }
+
+        @@media (max-width: 600px) {
+            .my-account-link span {
+                display: none;
+            }
+
+            .my-account-link {
+                padding: 8px;
+                font-size: 18px !important;
+            }
+        }
+
+        .logout-form {
+            margin: 0;
+        }
+
+        .logout-btn {
+            border: 0;
+            background: none;
+            color: #d4af37;
+            font-size: 21px;
+            cursor: pointer;
+        }
+
+            .logout-btn:hover {
+                color: white;
+            }
+
+        .banner {
+            position: relative;
+            width: 100%;
+            height: 520px;
+            overflow: hidden;
+            background: #111;
+            color: #fff;
+        }
+
+        .banner-video {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+        }
+
+        .banner::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient( 90deg, rgba(0, 0, 0, .58) 0%, rgba(0, 0, 0, .20) 55%, rgba(0, 0, 0, .05) 100% );
+            pointer-events: none;
+        }
+
+        .banner-content {
+            position: absolute;
+            z-index: 2;
+            left: 7%;
+            bottom: 11%;
+            max-width: 720px;
+            text-align: left;
+            padding: 0;
+        }
+
+        .banner h1 {
+            margin: 0 0 12px;
+            color: #fff;
+            font-size: clamp(30px, 4.2vw, 58px);
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-shadow: 2px 3px 12px rgba(0, 0, 0, .75);
+        }
+
+        .banner p {
+            margin: 0;
+            color: #fff;
+            font-size: clamp(15px, 1.5vw, 20px);
+            line-height: 1.6;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, .85);
+        }
+
+        .main {
+            max-width: 1250px;
+            margin: auto;
+            padding: 35px 20px 65px;
+        }
+
+        .search-area {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 20;
+        }
+
+        .search-wrap {
+            width: 100%;
+            max-width: 750px;
+            position: relative;
+        }
+
+        .search-box {
+            display: flex;
+            background: white;
+            border: 1px solid #e0d9c8;
+            border-radius: 35px;
+            overflow: hidden;
+        }
+
+            .search-box input {
+                flex: 1;
+                min-width: 0;
+                border: 0;
+                outline: none;
+                padding: 18px 23px;
+                font-size: 15px;
+            }
+
+            .search-box button {
+                border: 0;
+                background: #d4af37;
+                padding: 0 26px;
+                cursor: pointer;
+                font-weight: bold;
+            }
+
+        .search-panel {
+            display: none;
+            position: absolute;
+            top: calc(100% + 10px);
+            left: 0;
+            width: 100%;
+            background: white;
+            padding: 23px;
+            border: 1px solid #e8dfcb;
+            border-radius: 18px;
+            box-shadow: 0 15px 40px #0002;
+        }
+
+            .search-panel.open {
+                display: block;
+            }
+
+        .panel-title {
+            font-size: 14px;
+            font-weight: bold;
+            margin: 0 0 13px;
+        }
+
+        .search-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 9px;
+            margin-bottom: 22px;
+        }
+
+            .search-tags button {
+                border: 1px solid #dfd4b9;
+                background: #faf9f6;
+                border-radius: 20px;
+                padding: 9px 16px;
+                cursor: pointer;
+            }
+
+        .price-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+            .price-row input {
+                width: 50%;
+                min-width: 0;
+                padding: 13px;
+                border: 1px solid #ddd;
+                border-radius: 9px;
+            }
+
+        .panel-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+            .panel-actions button {
+                padding: 11px 18px;
+                border-radius: 8px;
+                cursor: pointer;
+            }
+
+        .reset-btn {
+            background: white;
+            border: 1px solid #ccc;
+        }
+
+        .apply-btn {
+            background: #d4af37;
+            border: 1px solid #d4af37;
+        }
+
+        .categories {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 28px;
+        }
+
+        .category-btn {
+            background: transparent;
+            color: #444;
+            border: 1px solid #d6cbb1;
+            border-radius: 25px;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+
+            .category-btn.active,
+            .category-btn:hover {
+                background: #111;
+                color: #d4af37;
+            }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 13px;
+            overflow: hidden;
+            box-shadow: 0 5px 18px #0001;
+            transition: .2s;
+        }
+
+            .product-card:hover {
+                transform: translateY(-5px);
+            }
+
+        .product-image {
+            width: 100%;
+            height: 310px;
+            object-fit: cover;
+            display: block;
+            background: #eee;
+            cursor: pointer;
+        }
+
+        .image-hint {
+            text-align: center;
+            font-size: 11px;
+            color: #999;
+            margin-top: 7px;
+        }
+
+        .product-info {
+            padding: 20px;
+        }
+
+        .product-category {
+            font-size: 12px;
+            color: #888;
+            text-transform: uppercase;
+        }
+
+        .product-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 12px 0;
+            min-height: 42px;
+        }
+
+        .product-price {
+            color: #b28a21;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 18px;
+        }
+
+        .product-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-detail,
+        .btn-buy {
+            flex: 1;
+            padding: 12px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-detail {
+            background: white;
+            border: 1px solid #d4af37;
+            color: #9c7619;
+        }
+
+        .btn-buy {
+            background: #111;
+            border: 1px solid #111;
+            color: #d4af37;
+        }
+
+        .more-area {
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .more-btn {
+            background: #111;
+            color: #d4af37;
+            border: 0;
+            padding: 15px 45px;
+            border-radius: 30px;
+            cursor: pointer;
+        }
+
+        .empty-message {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 50px;
+            color: #777;
+        }
+
+        footer {
+            background: #111;
+            color: white;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+            footer h2 {
+                color: #d4af37;
+            }
+
+            footer p {
+                line-height: 1.9;
+            }
+
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: #000b;
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 28px;
+            width: 100%;
+            max-width: 480px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 12px;
+            right: 18px;
+            background: none;
+            border: 0;
+            font-size: 27px;
+            cursor: pointer;
+        }
+
+        .modal-content img {
+            width: 100%;
+            height: 260px;
+            object-fit: contain;
+        }
+
+        .cart-modal-content {
+            max-width: 720px;
+        }
+
+        .cart-title {
+            margin: 0 0 22px;
+        }
+
+            .cart-title i {
+                color: #b28a21;
+            }
+
+        .cart-item {
+            display: flex;
+            gap: 17px;
+            align-items: center;
+            padding: 17px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+            .cart-item img {
+                width: 90px;
+                height: 100px;
+                object-fit: cover;
+                border-radius: 8px;
+            }
+
+        .cart-item-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .cart-item-name {
+            font-weight: bold;
+            margin-bottom: 9px;
+        }
+
+        .cart-item-price {
+            color: #b28a21;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+            .quantity-controls button {
+                width: 30px;
+                height: 30px;
+                border: 1px solid #ddd;
+                background: white;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+
+        .remove-cart {
+            border: 0;
+            background: none;
+            color: #b92d2d;
+            font-size: 19px;
+            cursor: pointer;
+        }
+
+        .cart-summary {
+            margin-top: 22px;
+            padding-top: 20px;
+            border-top: 2px solid #e5d6a9;
+        }
+
+        .cart-total-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 19px;
+            font-weight: bold;
+        }
+
+        .cart-total-price {
+            color: #b28a21;
+            font-size: 23px;
+        }
+
+        .cart-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+            .cart-buttons button {
+                flex: 1;
+                padding: 14px;
+                border-radius: 8px;
+                font-weight: bold;
+                cursor: pointer;
+            }
+
+        .continue-shopping {
+            background: white;
+            border: 1px solid #d4af37;
+        }
+
+        .checkout-btn {
+            background: #111;
+            color: #d4af37;
+            border: 0;
+        }
+
+        .cart-empty {
+            text-align: center;
+            padding: 40px;
+            color: #777;
+        }
+
+            .cart-empty i {
+                font-size: 45px;
+                color: #d4af37;
+            }
+
+        .checkout-content {
+            max-width: 650px;
+        }
+
+        .checkout-title {
+            color: #b28a21;
+            margin-top: 0;
+        }
+
+        .checkout-summary {
+            background: #f8f6f0;
+            padding: 15px;
+            border-radius: 9px;
+            margin-bottom: 22px;
+        }
+
+            .checkout-summary p {
+                margin: 8px 0;
+            }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+            .form-group label {
+                display: block;
+                font-weight: bold;
+                margin-bottom: 7px;
+                font-size: 14px;
+            }
+
+            .form-group input,
+            .form-group textarea,
+            .form-group select {
+                width: 100%;
+                padding: 13px;
+                border: 1px solid #ddd;
+                border-radius: 7px;
+                font-size: 15px;
+                font-family: Arial;
+            }
+
+            .form-group textarea {
+                height: 85px;
+                resize: vertical;
+            }
+
+        .submit-order {
+            width: 100%;
+            padding: 15px;
+            background: #111;
+            color: #d4af37;
+            border: 0;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .checkout-back {
+            background: white;
+            border: 1px solid #d4af37;
+            padding: 11px 17px;
+            border-radius: 7px;
+            cursor: pointer;
+            margin-bottom: 15px;
+        }
+
+        .toast {
+            position: fixed;
+            right: 25px;
+            bottom: 25px;
+            background: #111;
+            color: #d4af37;
+            padding: 15px 22px;
+            border-radius: 9px;
+            z-index: 200;
+            display: none;
+        }
+
+        @@media(max-width:900px) {
+            .product-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @@media(max-width:600px) {
+            header {
+                padding: 18px 4%;
+            }
+
+            .logo {
+                font-size: 16px;
+            }
+
+            .header-icons {
+                gap: 13px;
+            }
+
+            .banner {
+                height: 300px;
+            }
+
+            .banner-content {
+                left: 6%;
+                right: 6%;
+                bottom: 9%;
+            }
+
+            .banner h1 {
+                font-size: 27px;
+                letter-spacing: 1px;
+            }
+
+            .banner p {
+                font-size: 14px;
+            }
+
+            .product-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .categories {
+                justify-content: center;
+            }
+
+            .product-image {
+                height: 330px;
+            }
+
+            .search-box button {
+                padding: 0 15px;
+            }
+
+            .cart-item img {
+                width: 70px;
+                height: 85px;
+            }
+
+            .cart-buttons {
+                flex-direction: column;
+            }
+
+            .account-name {
+                max-width: 95px;
+            }
+        }
+
+        /* GIAO DIEN TRANG DEN - TRANG */
+        body {
+            background: #fff;
+            color: #111;
+        }
+
+        header, .luxury-header, footer {
+            background: #080808;
+            color: #fff;
+        }
+
+            .logo, .header-icons a, .logout-btn, .account-name,
+            .luxury-header .header-icons a, footer h2 {
+                color: #fff;
+            }
+
+                .header-icons a:hover, .logout-btn:hover {
+                    color: #c9c9c9;
+                }
+
+        .cart-count {
+            background: #fff;
+            color: #000;
+        }
+
+        .search-box {
+            background: #111;
+            border: 1px solid #111;
+        }
+
+            .search-box input {
+                background: #111;
+                color: #fff;
+            }
+
+                .search-box input::placeholder {
+                    color: #c9c9c9;
+                }
+
+            .search-box button {
+                background: #111;
+                color: #fff;
+                border-left: 1px solid #fff;
+            }
+
+                .search-box button:hover {
+                    background: #333;
+                }
+        /* Thanh tim kiem trang, kinh lup den ben phai */
+        .search-box {
+            background: #fff;
+            border: 1px solid #d8d8d8;
+            border-radius: 9px;
+            min-height: 48px;
+            align-items: center;
+        }
+
+            .search-box input {
+                background: #fff;
+                color: #111;
+                padding: 13px 16px;
+                font-size: 15px;
+            }
+
+                .search-box input::placeholder {
+                    color: #b4b4b4;
+                }
+
+            .search-box button {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: #fff;
+                color: #111;
+                border: 0;
+                padding: 0 17px;
+                align-self: stretch;
+                font-size: 19px;
+            }
+
+                .search-box button:hover {
+                    background: #f2f2f2;
+                }
+
+        .search-panel {
+            border-color: #ddd;
+        }
+
+        .search-tags button {
+            background: #fff;
+            color: #111;
+            border: 1px solid #222;
+        }
+
+            .search-tags button:hover {
+                background: #111;
+                color: #fff;
+            }
+
+        .price-row input {
+            background: #fff;
+            color: #111;
+        }
+
+        .reset-btn {
+            background: #fff;
+            color: #111;
+            border: 1px solid #111;
+        }
+
+        .apply-btn {
+            background: #111;
+            color: #fff;
+            border: 1px solid #111;
+        }
+
+        .category-btn {
+            color: #111;
+            border: 1px solid #111;
+        }
+
+            .category-btn.active, .category-btn:hover {
+                background: #111;
+                color: #fff;
+            }
+
+        .product-card {
+            background: #fff;
+            border: 1px solid #ececec;
+        }
+
+        .product-price, .cart-item-price, .cart-total-price,
+        .checkout-title, .checkout-summary strong {
+            color: #111;
+        }
+
+        .btn-detail {
+            background: #fff;
+            color: #111;
+            border: 1px solid #111;
+        }
+
+            .btn-detail:hover {
+                background: #eee;
+            }
+
+        .btn-buy, .more-btn, .checkout-btn, .submit-order {
+            background: #111;
+            color: #fff;
+            border: 1px solid #111;
+        }
+
+            .btn-buy:hover, .more-btn:hover, .checkout-btn:hover,
+            .submit-order:hover {
+                background: #333;
+            }
+
+        .cart-title i, .cart-empty i {
+            color: #111;
+        }
+
+        .cart-summary {
+            border-top-color: #111;
+        }
+
+        .continue-shopping, .checkout-back {
+            border: 1px solid #111;
+            color: #111;
+        }
+
+        .checkout-summary {
+            background: #f4f4f4;
+        }
+
+        .toast {
+            background: #111;
+            color: #fff;
+        }
+
+        .banner h1 {
+            font-size: clamp(24px, 3vw, 42px);
+            letter-spacing: 1px;
+        }
+
+        .banner p {
+            font-size: clamp(13px, 1.15vw, 16px);
+        }
+
+        @@media (max-width: 600px) {
+            .banner h1 {
+                font-size: 22px;
+                letter-spacing: .5px;
+            }
+
+            .banner p {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="luxury-header">
+        <div class="header-left"></div>
+
+        <a class="header-logo"
+           href="@Url.Action("Index", "Home")"
+           title="Trang chủ">
+            <img src="@Url.Content("~/Content/logo.png")"
+                 alt="ML Logo" />
+        </a>
+
+        <nav class="header-icons">
+            @if (isLoggedIn && ((ViewBag.IsAdmin != null && Convert.ToBoolean(ViewBag.IsAdmin)) ||
+                 (Session["IsAdmin"] != null && Convert.ToBoolean(Session["IsAdmin"]))))
+            {
+                <a href="@Url.Action("Index", "Admin")" title="Trang quản trị"
+                   style="display:inline-flex;align-items:center;gap:7px;background:transparent;border:1px solid #fff;border-radius:5px;padding:9px 12px;color:#fff;font-size:14px;text-decoration:none;white-space:nowrap;position:relative;z-index:1000;">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <span>Quản trị</span>
+                </a>
+            }
+            <a href="@Url.Action("Index", "Home")"
+               title="Trang chủ">
+                <i class="fa-solid fa-house"></i>
+            </a>
+
+            <a href="#"
+               onclick="showCart();return false;"
+               title="Giỏ hàng">
+                <i class="fa-solid fa-cart-shopping"></i>
+                <span class="cart-count" id="cartCount">0</span>
+            </a>
+
+            @if (!isLoggedIn)
+            {
+                <a href="@Url.Action("Login", "Account")"
+                   title="Đăng nhập">
+                    <i class="fa-solid fa-user"></i>
+                </a>
+            }
+            else
+            {
+                <a href="@Url.Action("Index", "CustomerProfile")"
+                   title="Tài khoản của tôi"
+                   class="my-account-link">
+                    <i class="fa-solid fa-user-gear"></i>
+                    <span>TÀI KHOẢN CỦA TÔI</span>
+                </a>
+
+                <span class="account-name" title="@customerName">
+                    <i class="fa-solid fa-user"></i>
+                    @customerName
+                </span>
+
+                using (Html.BeginForm("Logout", "Account",
+                    FormMethod.Post, new { @class = "logout-form" }))
+                {
+                    @Html.AntiForgeryToken()
+
+                    <button class="logout-btn"
+                            type="submit"
+                            title="Đăng xuất">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
+                }
+            }
+        </nav>
+    </header>
+
+
+    <style>
+        .luxury-header {
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 6%;
+            background: #111;
+        }
+
+        .header-left {
+            flex: 1;
+        }
+
+        .header-logo {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+        }
+
+            .header-logo img {
+                display: block;
+                width: 65px;
+                height: 48px;
+                object-fit: contain;
+            }
+
+        .luxury-header .header-icons {
+            margin-left: auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        @@media (max-width: 600px) {
+            .luxury-header {
+                padding: 18px 4%;
+            }
+
+            .header-logo img {
+                width: 48px;
+                height: 38px;
+            }
+
+            .luxury-header .header-icons {
+                gap: 12px;
+            }
+        }
+    </style>
+
+
+
+    <section class="banner">
+        <video class="banner-video"
+               autoplay
+               muted
+               loop
+               playsinline
+               preload="auto">
+            <source src="@Url.Content("~/Content/banner.mp4")" type="video/mp4" />
+            Trình duyệt của bạn không hỗ trợ video.
+        </video>
+
+        <div class="banner-content">
+            <h1>MINI SHOP &amp; LUXURY</h1>
+            <p>Khám phá phong cách thời trang sang trọng</p>
+        </div>
+    </section>
+
+    <main class="main">
+        <div class="search-area">
+            <div class="search-wrap" id="searchWrap">
+                <form class="search-box" onsubmit="searchProducts(event)">
+                    <input id="searchInput"
+                           placeholder="Bạn muốn mua gì hôm nay?"
+                           autocomplete="off" />
+
+                    <button type="submit" aria-label="Tìm kiếm" title="Tìm kiếm">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </button>
+                </form>
+
+                <div class="search-panel" id="searchPanel">
+                    <p class="panel-title">Tìm kiếm phổ biến</p>
+
+                    <div class="search-tags">
+                        <button type="button" onclick="chooseKeyword('Áo')">Áo</button>
+                        <button type="button" onclick="chooseKeyword('Quần')">Quần</button>
+                        <button type="button" onclick="chooseKeyword('Phụ kiện')">Phụ kiện</button>
+                        <button type="button" onclick="chooseKeyword('Thời trang')">Thời trang</button>
+                    </div>
+
+                    <p class="panel-title">Lọc theo khoảng giá (VNĐ)</p>
+
+                    <div class="price-row">
+                        <input type="number"
+                               min="0"
+                               id="minPrice"
+                               placeholder="Giá từ" />
+
+                        <span>—</span>
+
+                        <input type="number"
+                               min="0"
+                               id="maxPrice"
+                               placeholder="Giá đến" />
+                    </div>
+
+                    <div class="panel-actions">
+                        <button class="reset-btn"
+                                type="button"
+                                onclick="resetSearch()">
+                            Xóa bộ lọc
+                        </button>
+
+                        <button class="apply-btn"
+                                type="button"
+                                onclick="applySearch()">
+                            Tìm kiếm
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="categories">
+            <button type="button"
+                    class="category-btn active"
+                    onclick="filterCategory('all', this)">
+                Tất cả
+            </button>
+
+            @{
+                System.Data.DataTable categories =
+                    ViewBag.Categories as System.Data.DataTable;
+            }
+
+            @if (categories != null)
+            {
+                foreach (System.Data.DataRow category in categories.Rows)
+                {
+                    string categoryName =
+                        Convert.ToString(category["CategoryName"]);
+
+                    <button type="button"
+                            class="category-btn"
+                            data-category="@categoryName"
+                            onclick="filterCategory(this.getAttribute('data-category'), this)">
+                        @categoryName
+                    </button>
+                }
+            }
+        </div>
+
+
+        <div class="product-grid" id="productGrid"></div>
+
+        <div class="more-area">
+            <button class="more-btn"
+                    id="moreBtn"
+                    onclick="showMore()">
+                Xem thêm sản phẩm
+                <i class="fa-solid fa-chevron-down"></i>
+            </button>
+        </div>
+    </main>
+
+    <footer>
+        <h2>THÔNG TIN LIÊN HỆ</h2>
+        <p>828 Sư Vạn Hạnh, Quận 10, Thành phố Hồ Chí Minh</p>
+        <p>ZALO: 0363838578</p>
+    </footer>
+
+    <!-- CHI TIET SAN PHAM -->
+    <div class="modal"
+         id="detailModal"
+         onclick="closeModal(event,'detailModal')">
+
+        <div class="modal-content">
+            <button class="modal-close"
+                    onclick="hideModal('detailModal')">
+                &times;
+            </button>
+
+            <div id="detailBody"></div>
+        </div>
+    </div>
+
+    <!-- GIO HANG -->
+    <div class="modal"
+         id="cartModal"
+         onclick="closeModal(event,'cartModal')">
+
+        <div class="modal-content cart-modal-content">
+            <button class="modal-close"
+                    onclick="hideModal('cartModal')">
+                &times;
+            </button>
+
+            <h2 class="cart-title">
+                <i class="fa-solid fa-cart-shopping"></i>
+                Giỏ hàng của bạn
+            </h2>
+
+            <div id="cartItems"></div>
+
+            <div class="cart-summary" id="cartSummary">
+                <div class="cart-total-row">
+                    <span>Tổng tiền:</span>
+                    <span class="cart-total-price" id="cartTotal">0 ₫</span>
+                </div>
+
+                <div class="cart-buttons">
+                    <button class="continue-shopping"
+                            onclick="hideModal('cartModal')">
+                        Tiếp tục mua sắm
+                    </button>
+
+                    <button class="checkout-btn"
+                            onclick="goCheckout()">
+                        Tiến hành thanh toán
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- THANH TOAN -->
+    <div class="modal"
+         id="checkoutModal"
+         onclick="closeModal(event,'checkoutModal')">
+
+        <div class="modal-content checkout-content">
+            <button class="modal-close"
+                    onclick="hideModal('checkoutModal')">
+                &times;
+            </button>
+
+            <button class="checkout-back" onclick="backToCart()">
+                <i class="fa-solid fa-arrow-left"></i>
+                Quay lại giỏ hàng
+            </button>
+
+            <h2 class="checkout-title">
+                <i class="fa-solid fa-truck-fast"></i>
+                THÔNG TIN ĐẶT HÀNG
+            </h2>
+
+            <div class="checkout-summary">
+                <strong>Đơn hàng của bạn</strong>
+                <div id="checkoutItems"></div>
+                <hr />
+
+                <p>
+                    <strong>
+                        Tổng thanh toán:
+                        <span id="checkoutTotal"
+                              style="color:#b28a21"></span>
+                    </strong>
+                </p>
+            </div>
+
+            <form id="checkoutForm" onsubmit="submitOrder(event)">
+                @Html.AntiForgeryToken()
+                <div class="form-group">
+                    <label>Họ và tên người nhận *</label>
+                    <input type="text"
+                           id="customerName"
+                           required
+                           maxlength="100"
+                           placeholder="Nhập họ tên của bạn" />
+                </div>
+
+                <div class="form-group">
+                    <label>Số điện thoại *</label>
+                    <input type="tel"
+                           id="customerPhone"
+                           required
+                           maxlength="10"
+                           minlength="10"
+                           pattern="[0-9]{10}"
+                           inputmode="numeric"
+                           oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)"
+                           placeholder="Nhập đúng 10 chữ số" />
+                </div>
+
+                <div class="form-group">
+                    <label>Địa chỉ nhận hàng *</label>
+                    <input type="text"
+                           id="customerAddress"
+                           required
+                           maxlength="250"
+                           placeholder="Số nhà, tên đường, phường/xã, quận/huyện..." />
+                </div>
+
+                <div class="form-group">
+                    <label>Tỉnh / Thành phố *</label>
+                    <input type="text"
+                           id="customerCity"
+                           required
+                           maxlength="100"
+                           placeholder="Nhập tỉnh hoặc thành phố" />
+                </div>
+
+                <div id="checkoutPaymentChoices" style="margin:20px 0;padding:20px;background:#f8f8f8;border:1px solid #e5e5e5;border-radius:10px;color:#111;">
+                    <div style="font-size:16px;font-weight:bold;margin-bottom:15px;">PHƯƠNG THỨC THANH TOÁN</div>
+
+                    <select id="paymentMethod" name="PaymentMethod" style="display:none;" aria-hidden="true" tabindex="-1">
+                        <option value="COD" selected>COD</option>
+                        <option value="BANK">BANK</option>
+                    </select>
+
+                    <label style="display:flex;align-items:center;gap:10px;padding:13px;margin-bottom:10px;background:#fff;border:1px solid #ddd;border-radius:8px;cursor:pointer;font-weight:normal;">
+                        <input type="radio" name="paymentChoice" value="COD" checked
+                               onchange="document.getElementById('paymentMethod').value='COD';document.getElementById('bankPaymentInfo').style.display='none';" />
+                        <span>Thanh toán khi nhận hàng (COD)</span>
+                    </label>
+
+                    <label style="display:flex;align-items:center;gap:10px;padding:13px;background:#fff;border:1px solid #ddd;border-radius:8px;cursor:pointer;font-weight:normal;">
+                        <input type="radio" name="paymentChoice" value="BANK"
+                               onchange="document.getElementById('paymentMethod').value='BANK';document.getElementById('bankPaymentInfo').style.display='block';" />
+                        <span>Chuyển khoản ngân hàng BIDV (VietQR)</span>
+                    </label>
+
+                    <div id="bankPaymentInfo" style="display:none;margin-top:15px;padding:15px;background:#fff;border:1px solid #ddd;border-radius:8px;font-size:14px;line-height:1.8;">
+                        <strong>Thông tin nhận chuyển khoản</strong>
+                        <div>Ngân hàng: BIDV</div>
+                        <div>Số tài khoản: 0363838578</div>
+                        <div>Chủ tài khoản: HO TIEN SY</div>
+                        <p style="margin-bottom:0;color:#666;">Sau khi đặt hàng thành công, website sẽ hiển thị mã QR có sẵn số tiền và nội dung chuyển khoản.</p>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Ghi chú đơn hàng</label>
+                    <textarea id="orderNote"
+                              maxlength="500"
+                              placeholder="Ghi chú thêm cho cửa hàng..."></textarea>
+                </div>
+
+                <button type="submit" class="submit-order">
+                    <i class="fa-solid fa-check"></i>
+                    XÁC NHẬN ĐẶT HÀNG
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        window.MINI_SHOP_IMAGE_FOLDER = '@Url.Content("~/Content/images san_pham/")';
+    </script>
+    <script>
+                        document.getElementById('checkoutForm').addEventListener('reset', function () {
+                            document.getElementById('bankPaymentInfo').style.display = 'none';
+                        });
+    </script>
+    <script src="@Url.Content("~/Scripts/mini-shop-home.js")"></script>
+</body>
+</html>

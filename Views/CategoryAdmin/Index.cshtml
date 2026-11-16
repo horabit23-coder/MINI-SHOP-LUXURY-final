@@ -1,0 +1,486 @@
+﻿
+@model System.Data.DataTable
+@using System
+@using System.Data
+
+@{
+    ViewBag.Title = "Quản lý danh mục";
+    Layout = null;
+
+    int total = Model == null ? 0 : Model.Rows.Count;
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Quản lý danh mục - MINI SHOP & LUXURY</title>
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #f5f5f5;
+            color: #111;
+            font-family: Arial, sans-serif;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            height: 100vh;
+            background: #101010;
+            color: white;
+            padding: 28px 18px;
+        }
+
+        .brand {
+            text-align: center;
+            font-size: 21px;
+            font-weight: bold;
+            line-height: 1.5;
+            letter-spacing: 2px;
+            margin-bottom: 40px;
+        }
+
+            .brand small {
+                display: block;
+                color: #aaa;
+                font-size: 12px;
+                font-weight: normal;
+            }
+
+        .menu a {
+            display: block;
+            color: #ddd;
+            text-decoration: none;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 7px;
+            font-size: 14px;
+        }
+
+            .menu a i {
+                width: 24px;
+            }
+
+            .menu a:hover,
+            .menu a.active {
+                background: white;
+                color: #111;
+            }
+
+        .sidebar-footer {
+            border-top: 1px solid #333;
+            margin-top: 25px;
+            padding-top: 18px;
+        }
+
+            .sidebar-footer a {
+                display: block;
+                color: #ddd;
+                text-decoration: none;
+                padding: 15px;
+                border-radius: 7px;
+                font-size: 14px;
+            }
+
+                .sidebar-footer a i {
+                    width: 24px;
+                }
+
+                .sidebar-footer a:hover {
+                    background: #fff;
+                    color: #111;
+                }
+
+        .main {
+            margin-left: 250px;
+            padding: 35px;
+        }
+
+        .heading {
+            margin-bottom: 28px;
+        }
+
+        h1 {
+            margin: 0 0 8px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #777;
+            font-size: 14px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 340px 1fr;
+            gap: 22px;
+            align-items: start;
+        }
+
+        .panel {
+            background: white;
+            border: 1px solid #e5e5e5;
+            border-radius: 12px;
+            padding: 25px;
+        }
+
+            .panel h2 {
+                font-size: 19px;
+                margin: 0 0 22px;
+            }
+
+        label {
+            display: block;
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .input {
+            width: 100%;
+            padding: 13px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+        }
+
+            .input:focus {
+                border-color: #111;
+            }
+
+        .btn {
+            display: inline-block;
+            padding: 11px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            text-decoration: none;
+            font-family: Arial, sans-serif;
+        }
+
+        .btn-add {
+            width: 100%;
+            margin-top: 15px;
+            background: #111;
+            border: 1px solid #111;
+            color: white;
+            font-weight: bold;
+        }
+
+        .btn-edit {
+            background: #111;
+            border: 1px solid #111;
+            color: white;
+        }
+
+        .btn-delete {
+            background: white;
+            border: 1px solid #b42323;
+            color: #b42323;
+        }
+
+            .btn-delete:hover {
+                background: #b42323;
+                color: white;
+            }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 15px 10px;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+
+        th {
+            background: #f7f7f7;
+            color: #555;
+            font-size: 13px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .edit-input {
+            width: 100%;
+            min-width: 130px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .notice {
+            padding: 13px 16px;
+            border-radius: 7px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .success {
+            background: #e5f4e8;
+            color: #23733b;
+        }
+
+        .error {
+            background: #fdeaea;
+            color: #b42323;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 35px;
+            color: #777;
+        }
+
+        @@media (max-width: 1000px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: static;
+                width: 100%;
+                height: auto;
+            }
+
+            .main {
+                margin-left: 0;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <aside class="sidebar">
+        <div class="brand">
+            MINI SHOP
+            <br />
+            &amp; LUXURY
+            <small>ADMIN PANEL</small>
+        </div>
+
+        <nav class="menu">
+
+            <a href="@Url.Action("Index", "Admin")">
+                <i class="fa-solid fa-gauge-high"></i>
+                Tổng quan
+            </a>
+
+            <a class="active"
+               href="@Url.Action("Index", "CategoryAdmin")">
+                <i class="fa-solid fa-list"></i>
+                Quản lý danh mục
+            </a>
+
+            <a href="@Url.Action("Index", "ProductAdmin")">
+                <i class="fa-solid fa-box"></i>
+                Quản lý sản phẩm
+            </a>
+
+            <a href="@Url.Action("Index", "OrderAdmin")">
+                <i class="fa-solid fa-receipt"></i>
+                Quản lý đơn hàng
+            </a>
+
+            <a href="@Url.Action("Index", "Home")">
+                <i class="fa-solid fa-store"></i>
+                Đi đến trang bán hàng
+            </a>
+
+        </nav>
+        <div class="sidebar-footer">
+            <a href="@Url.Action("Logout", "Account")">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                Đăng xuất
+            </a>
+        </div>
+    </aside>
+
+    <main class="main">
+
+        <div class="heading">
+            <h1>Quản lý danh mục</h1>
+            <p class="subtitle">
+                Thêm, sửa và xóa danh mục sản phẩm.
+            </p>
+        </div>
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="notice success">
+                @TempData["Success"]
+            </div>
+        }
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="notice error">
+                @TempData["Error"]
+            </div>
+        }
+
+        <div class="grid">
+
+            <section class="panel">
+
+                <h2>
+                    <i class="fa-solid fa-plus"></i>
+                    Thêm danh mục
+                </h2>
+
+                @using (Html.BeginForm("Create", "CategoryAdmin", FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken()
+
+                    <label for="categoryName">
+                        Tên danh mục
+                    </label>
+
+                    <input class="input"
+                           id="categoryName"
+                           type="text"
+                           name="categoryName"
+                           maxlength="100"
+                           placeholder="Nhập tên danh mục..."
+                           required />
+
+                    <button class="btn btn-add" type="submit">
+                        <i class="fa-solid fa-plus"></i>
+                        Thêm danh mục
+                    </button>
+                }
+
+            </section>
+
+            <section class="panel">
+
+                <h2>Danh sách danh mục (@total)</h2>
+
+                @if (total == 0)
+                {
+                    <div class="empty">
+                        Chưa có danh mục nào.
+                    </div>
+                }
+                else
+                {
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Mã</th>
+                                    <th>Tên danh mục / Chỉnh sửa</th>
+                                    <th>Sản phẩm</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                @foreach (DataRow category in Model.Rows)
+                                {
+                                    int id = Convert.ToInt32(category["CategoryId"]);
+                                    string name = Convert.ToString(category["CategoryName"]);
+                                    int count = Convert.ToInt32(category["ProductCount"]);
+
+                                    <tr>
+
+                                        <td>#@id</td>
+
+                                        <td>
+                                            @using (Html.BeginForm(
+                                                "Edit",
+                                                "CategoryAdmin",
+                                                new { id = id },
+                                                FormMethod.Post,
+                                                new { id = "edit-" + id }))
+                                            {
+                                                @Html.AntiForgeryToken()
+
+                                                <input class="edit-input"
+                                                       type="text"
+                                                       name="categoryName"
+                                                       value="@name"
+                                                       maxlength="100"
+                                                       required />
+                                            }
+                                        </td>
+
+                                        <td>@count</td>
+
+                                        <td>
+                                            <div class="actions">
+
+                                                <button class="btn btn-edit"
+                                                        type="submit"
+                                                        form="edit-@id">
+                                                    <i class="fa-solid fa-pen"></i>
+                                                    Lưu
+                                                </button>
+
+                                                @using (Html.BeginForm(
+                                                    "Delete",
+                                                    "CategoryAdmin",
+                                                    new { id = id },
+                                                    FormMethod.Post,
+                                                    new
+                                                    {
+                                                        onsubmit = "return confirm('Bạn chắc chắn muốn xóa danh mục này?');"
+                                                    }))
+                                                {
+                                                    @Html.AntiForgeryToken()
+
+                                                    <button class="btn btn-delete"
+                                                            type="submit">
+                                                        <i class="fa-solid fa-trash"></i>
+                                                        Xóa
+                                                    </button>
+                                                }
+
+                                            </div>
+                                        </td>
+
+                                    </tr>
+                                }
+
+                            </tbody>
+                        </table>
+                    </div>
+                }
+
+            </section>
+
+        </div>
+
+    </main>
+
+</body>
+</html>

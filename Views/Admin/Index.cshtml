@@ -1,0 +1,1064 @@
+﻿
+@using System
+@using System.Collections.Generic
+@using System.Web.Helpers
+@using MINI_SHOP_LUXURY.Controllers
+
+@{
+    ViewBag.Title = "Dashboard - MINI SHOP & LUXURY";
+    Layout = null;
+
+    string adminName = Convert.ToString(
+        ViewBag.AdminName ?? Session["CustomerName"] ?? "Admin");
+
+    int totalProducts = Convert.ToInt32(ViewBag.TotalProducts ?? 0);
+    int totalCategories = Convert.ToInt32(ViewBag.TotalCategories ?? 0);
+    int totalOrders = Convert.ToInt32(ViewBag.TotalOrders ?? 0);
+    int pendingOrders = Convert.ToInt32(ViewBag.PendingOrders ?? 0);
+
+    decimal totalRevenue = Convert.ToDecimal(
+        ViewBag.TotalRevenue ?? 0m);
+
+    decimal unconfirmedRevenue = Convert.ToDecimal(
+        ViewBag.UnconfirmedRevenue ?? 0m);
+
+    var monthlyRevenues =
+        ViewBag.MonthlyRevenues as List<AdminController.MonthlyRevenue>
+        ?? new List<AdminController.MonthlyRevenue>();
+
+    var orderStatuses =
+        ViewBag.OrderStatuses as List<AdminController.OrderStatusStatistic>
+        ?? new List<AdminController.OrderStatusStatistic>();
+
+    var recentOrders =
+        ViewBag.RecentOrders as List<AdminController.RecentOrder>
+        ?? new List<AdminController.RecentOrder>();
+
+    var chartLabels = new List<string>();
+    var chartRevenues = new List<decimal>();
+    var chartOrderCounts = new List<int>();
+
+    foreach (var item in monthlyRevenues)
+    {
+        chartLabels.Add(item.Month);
+        chartRevenues.Add(item.Revenue);
+        chartOrderCounts.Add(item.OrderCount);
+    }
+
+    var statusLabels = new List<string>();
+    var statusCounts = new List<int>();
+
+    foreach (var item in orderStatuses)
+    {
+        statusLabels.Add(item.Status);
+        statusCounts.Add(item.Count);
+    }
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1" />
+
+    <title>Admin Dashboard - MINI SHOP &amp; LUXURY</title>
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            color: #111;
+        }
+
+        a {
+            color: inherit;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            height: 100vh;
+            padding: 28px 18px;
+            background: #101010;
+            color: #fff;
+            overflow-y: auto;
+            z-index: 10;
+        }
+
+        .brand {
+            text-align: center;
+            font-size: 21px;
+            font-weight: bold;
+            line-height: 1.5;
+            letter-spacing: 2px;
+            margin-bottom: 40px;
+        }
+
+            .brand small {
+                display: block;
+                color: #aaa;
+                font-size: 12px;
+                font-weight: normal;
+            }
+
+        .menu a,
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 10px;
+            color: #ddd;
+            background: transparent;
+            border: none;
+            border-radius: 7px;
+            text-decoration: none;
+            font-size: 14px;
+            font-family: Arial, sans-serif;
+            cursor: pointer;
+            text-align: left;
+        }
+
+            .menu a i,
+            .logout-btn i {
+                width: 22px;
+            }
+
+            .menu a:hover,
+            .menu a.active,
+            .logout-btn:hover {
+                background: #fff;
+                color: #111;
+            }
+
+        .menu hr {
+            border: none;
+            border-top: 1px solid #333;
+            margin: 20px 0;
+        }
+
+        .main {
+            margin-left: 250px;
+            padding: 35px;
+            max-width: 1800px;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            margin-top: 10px;
+            color: #777;
+            font-size: 14px;
+        }
+
+        .admin-name {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 12px 18px;
+            white-space: nowrap;
+        }
+
+        .section-title {
+            margin: 32px 0 18px;
+            font-size: 19px;
+            font-weight: bold;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: #fff;
+            border: 1px solid #e5e5e5;
+            border-radius: 12px;
+            padding: 25px;
+            min-height: 155px;
+            transition: 0.2s;
+        }
+
+            .stat-card:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+            }
+
+        .stat-icon {
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #111;
+            color: #fff;
+            border-radius: 10px;
+            font-size: 19px;
+            margin-bottom: 18px;
+        }
+
+        .stat-label {
+            color: #777;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 29px;
+            font-weight: bold;
+            overflow-wrap: anywhere;
+        }
+
+            .stat-value.money {
+                font-size: 25px;
+            }
+
+        .stat-card.highlight {
+            background: #111;
+            color: #fff;
+            border-color: #111;
+        }
+
+            .stat-card.highlight .stat-icon {
+                background: #fff;
+                color: #111;
+            }
+
+            .stat-card.highlight .stat-label {
+                color: #bbb;
+            }
+
+        .stat-note {
+            margin-top: 12px;
+            font-size: 12px;
+            color: #888;
+            line-height: 1.5;
+        }
+
+        .stat-card.highlight .stat-note {
+            color: #ccc;
+        }
+
+        .charts {
+            display: grid;
+            grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+            gap: 20px;
+        }
+
+        .chart-card {
+            min-width: 0;
+            background: #fff;
+            border: 1px solid #e5e5e5;
+            border-radius: 12px;
+            padding: 25px;
+        }
+
+            .chart-card h3 {
+                margin: 0 0 8px;
+                font-size: 18px;
+            }
+
+        .chart-description {
+            margin: 0 0 22px;
+            font-size: 13px;
+            color: #777;
+            line-height: 1.6;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 320px;
+        }
+
+            .chart-container.small {
+                height: 280px;
+            }
+
+            .chart-container canvas {
+                width: 100% !important;
+                height: 100% !important;
+            }
+
+        .status-list {
+            margin-top: 18px;
+        }
+
+        .status-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+
+            .status-row:last-child {
+                border-bottom: none;
+            }
+
+        .status-count {
+            background: #f1f1f1;
+            border-radius: 20px;
+            padding: 6px 12px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .table-card {
+            background: #fff;
+            border: 1px solid #e5e5e5;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            padding: 22px 25px;
+            border-bottom: 1px solid #eee;
+        }
+
+            .table-header h3 {
+                margin: 0;
+                font-size: 18px;
+            }
+
+        .view-all {
+            text-decoration: none;
+            background: #111;
+            color: #fff;
+            padding: 10px 16px;
+            border-radius: 7px;
+            font-size: 13px;
+        }
+
+            .view-all:hover {
+                background: #333;
+            }
+
+        .table-scroll {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        th {
+            background: #fafafa;
+            color: #666;
+            font-size: 13px;
+            font-weight: bold;
+            padding: 17px 20px;
+        }
+
+        td {
+            padding: 17px 20px;
+            border-top: 1px solid #eee;
+            font-size: 14px;
+        }
+
+        tbody tr:hover {
+            background: #fafafa;
+        }
+
+        .order-id,
+        .price {
+            font-weight: bold;
+        }
+
+        .order-status {
+            display: inline-block;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            padding: 7px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+
+        .detail-link {
+            display: inline-block;
+            padding: 8px 13px;
+            border: 1px solid #111;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+            .detail-link:hover {
+                background: #111;
+                color: #fff;
+            }
+
+        .empty {
+            padding: 28px;
+            text-align: center;
+            color: #888;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            display: block;
+            background: #fff;
+            border: 1px solid #e5e5e5;
+            border-radius: 12px;
+            padding: 28px;
+            text-decoration: none;
+            color: #111;
+            transition: 0.2s;
+        }
+
+            .card:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            }
+
+        .card-icon {
+            font-size: 27px;
+            margin-bottom: 18px;
+        }
+
+        .card h3 {
+            font-size: 17px;
+            color: #555;
+            margin: 0 0 15px;
+        }
+
+        .card p {
+            margin: 0;
+            font-size: 15px;
+            font-weight: bold;
+        }
+
+        .error-message {
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            border: 1px solid #c9c9c9;
+            border-radius: 8px;
+            background: #fff;
+            color: #333;
+        }
+
+        .footer {
+            margin-top: 35px;
+            padding: 20px 0;
+            color: #888;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        @@media (max-width: 1150px) {
+            .stats {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .charts {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @@media (max-width: 800px) {
+            .sidebar {
+                position: static;
+                width: 100%;
+                height: auto;
+            }
+
+            .main {
+                margin-left: 0;
+                padding: 20px;
+            }
+
+            .stats,
+            .cards {
+                grid-template-columns: 1fr;
+            }
+
+            .topbar,
+            .table-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <aside class="sidebar">
+
+        <div class="brand">
+            MINI SHOP
+            <br />
+            &amp; LUXURY
+            <small>ADMIN PANEL</small>
+        </div>
+
+        <nav class="menu">
+
+            <a class="active"
+               href="@Url.Action("Index", "Admin")">
+                <i class="fa-solid fa-gauge-high"></i>
+                Tổng quan
+            </a>
+
+            <a href="@Url.Action("Index", "CategoryAdmin")">
+                <i class="fa-solid fa-list"></i>
+                Quản lý danh mục
+            </a>
+
+            <a href="@Url.Action("Index", "ProductAdmin")">
+                <i class="fa-solid fa-box"></i>
+                Quản lý sản phẩm
+            </a>
+
+            <a href="@Url.Action("Index", "OrderAdmin")">
+                <i class="fa-solid fa-receipt"></i>
+                Quản lý đơn hàng
+            </a>
+
+            <a href="@Url.Action("Index", "Home")">
+                <i class="fa-solid fa-store"></i>
+                Đi đến trang bán hàng
+            </a>
+
+            <hr />
+
+            @using (Html.BeginForm(
+                "Logout",
+                "Account",
+                FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+
+                <button class="logout-btn" type="submit">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    Đăng xuất
+                </button>
+            }
+
+        </nav>
+    </aside>
+
+    <main class="main">
+
+        <div class="topbar">
+            <div>
+                <h1>Bảng điều khiển quản trị</h1>
+
+                <div class="subtitle">
+                    Thống kê hoạt động cửa hàng
+                    MINI SHOP &amp; LUXURY
+                </div>
+            </div>
+
+            <div class="admin-name">
+                <i class="fa-solid fa-user-shield"></i>
+                Xin chào, @adminName
+            </div>
+        </div>
+
+        @if (ViewBag.StatisticsError != null)
+        {
+            <div class="error-message">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                @ViewBag.StatisticsError
+            </div>
+        }
+
+        <div class="section-title">
+            <i class="fa-solid fa-chart-simple"></i>
+            Thống kê tổng quan
+        </div>
+
+        <div class="stats">
+
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-box"></i>
+                </div>
+
+                <div class="stat-label">Tổng sản phẩm</div>
+
+                <div class="stat-value">
+                    @totalProducts.ToString("N0")
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-list"></i>
+                </div>
+
+                <div class="stat-label">Tổng danh mục</div>
+
+                <div class="stat-value">
+                    @totalCategories.ToString("N0")
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-receipt"></i>
+                </div>
+
+                <div class="stat-label">Tổng đơn hàng</div>
+
+                <div class="stat-value">
+                    @totalOrders.ToString("N0")
+                </div>
+            </div>
+
+            <div class="stat-card highlight">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-money-bill-trend-up"></i>
+                </div>
+
+                <div class="stat-label">
+                    Tổng doanh thu
+                </div>
+
+                <div class="stat-value money">
+                    @totalRevenue.ToString("N0") ₫
+                </div>
+
+                <div class="stat-note">
+                    Tổng tiền các đơn hàng đã xác nhận thanh toán
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-hourglass-half"></i>
+                </div>
+
+                <div class="stat-label">
+                    Doanh thu chưa xác nhận
+                </div>
+
+                <div class="stat-value money">
+                    @unconfirmedRevenue.ToString("N0") ₫
+                </div>
+
+                <div class="stat-note">
+                    Tiền đơn hàng đang chờ xác nhận thanh toán
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-clock"></i>
+                </div>
+
+                <div class="stat-label">
+                    Đơn chờ xác nhận
+                </div>
+
+                <div class="stat-value">
+                    @pendingOrders.ToString("N0")
+                </div>
+            </div>
+
+        </div>
+
+        <div class="section-title">
+            <i class="fa-solid fa-chart-line"></i>
+            Biểu đồ kinh doanh
+        </div>
+
+        <div class="charts">
+
+            <div class="chart-card">
+                <h3>Doanh thu 12 tháng gần nhất</h3>
+
+                <p class="chart-description">
+                    Doanh thu của các đơn đã xác nhận thanh toán,
+                    thống kê theo tháng đặt hàng.
+                </p>
+
+                <div class="chart-container">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h3>Trạng thái đơn hàng</h3>
+
+                <p class="chart-description">
+                    Phân bố đơn hàng theo trạng thái hiện tại.
+                </p>
+
+                <div class="chart-container small">
+                    <canvas id="statusChart"></canvas>
+                </div>
+
+                <div class="status-list">
+
+                    @if (orderStatuses.Count == 0)
+                    {
+                        <div class="empty">
+                            Chưa có đơn hàng.
+                        </div>
+                    }
+                    else
+                    {
+                        foreach (var item in orderStatuses)
+                        {
+                            <div class="status-row">
+                                <span>@item.Status</span>
+                                <span class="status-count">
+                                    @item.Count
+                                </span>
+                            </div>
+                        }
+                    }
+
+                </div>
+            </div>
+
+        </div>
+
+        <div class="section-title">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+            Đơn hàng mới nhất
+        </div>
+
+        <div class="table-card">
+
+            <div class="table-header">
+                <h3>5 đơn hàng gần đây</h3>
+
+                <a class="view-all"
+                   href="@Url.Action("Index", "OrderAdmin")">
+                    Xem tất cả đơn hàng
+                    <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </div>
+
+            <div class="table-scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Mã đơn</th>
+                            <th>Khách hàng</th>
+                            <th>Ngày đặt</th>
+                            <th>Tổng tiền</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @if (recentOrders.Count == 0)
+                        {
+                            <tr>
+                                <td colspan="6" class="empty">
+                                    Chưa có đơn hàng nào.
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (var order in recentOrders)
+                            {
+                                <tr>
+                                    <td class="order-id">
+                                        #@order.OrderId
+                                    </td>
+
+                                    <td>
+                                        @order.CustomerName
+                                    </td>
+
+                                    <td>
+                                        @order.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                                    </td>
+
+                                    <td class="price">
+                                        @order.TotalAmount.ToString("N0") ₫
+                                    </td>
+
+                                    <td>
+                                        <span class="order-status">
+                                            @order.OrderStatus
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <a class="detail-link"
+                                           href="@Url.Action(
+                                               "Details",
+                                               "OrderAdmin",
+                                               new { id = order.OrderId })">
+                                            <i class="fa-solid fa-eye"></i>
+                                            Xem
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+        <div class="section-title">
+            <i class="fa-solid fa-screwdriver-wrench"></i>
+            Chức năng quản lý
+        </div>
+
+        <div class="cards">
+
+            <a class="card"
+               href="@Url.Action("Index", "CategoryAdmin")">
+                <div class="card-icon">
+                    <i class="fa-solid fa-list"></i>
+                </div>
+
+                <h3>Danh mục</h3>
+                <p>Quản lý danh mục sản phẩm</p>
+            </a>
+
+            <a class="card"
+               href="@Url.Action("Index", "ProductAdmin")">
+                <div class="card-icon">
+                    <i class="fa-solid fa-box"></i>
+                </div>
+
+                <h3>Sản phẩm</h3>
+                <p>Quản lý sản phẩm và tồn kho</p>
+            </a>
+
+            <a class="card"
+               href="@Url.Action("Index", "OrderAdmin")">
+                <div class="card-icon">
+                    <i class="fa-solid fa-receipt"></i>
+                </div>
+
+                <h3>Đơn hàng</h3>
+                <p>Xem và cập nhật trạng thái đơn hàng</p>
+            </a>
+
+        </div>
+
+        <div class="footer">
+            MINI SHOP &amp; LUXURY — ADMIN DASHBOARD
+        </div>
+
+    </main>
+
+    <script>
+        const revenueLabels =
+            @Html.Raw(Json.Encode(chartLabels));
+
+        const revenueValues =
+            @Html.Raw(Json.Encode(chartRevenues));
+
+        const orderCountValues =
+            @Html.Raw(Json.Encode(chartOrderCounts));
+
+        const statusLabels =
+            @Html.Raw(Json.Encode(statusLabels));
+
+        const statusValues =
+            @Html.Raw(Json.Encode(statusCounts));
+
+        function formatMoney(value) {
+            return Number(value).toLocaleString("vi-VN") + " ₫";
+        }
+
+        if (typeof Chart !== "undefined") {
+
+            const revenueCanvas =
+                document.getElementById("revenueChart");
+
+            if (revenueCanvas) {
+                new Chart(revenueCanvas, {
+                    type: "bar",
+
+                    data: {
+                        labels: revenueLabels,
+                        datasets: [
+                            {
+                                label: "Doanh thu đã xác nhận",
+                                data: revenueValues,
+                                backgroundColor: "#111111",
+                                borderRadius: 5,
+                                maxBarThickness: 42
+                            }
+                        ]
+                    },
+
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return formatMoney(
+                                            context.parsed.y
+                                        );
+                                    },
+
+                                    afterLabel: function(context) {
+                                        const index =
+                                            context.dataIndex;
+
+                                        return "Số đơn đã thanh toán: " +
+                                            orderCountValues[index];
+                                    }
+                                }
+                            }
+                        },
+
+                        scales: {
+                            x: {
+                                grid: {
+                                    display: false
+                                },
+
+                                ticks: {
+                                    maxRotation: 45,
+                                    minRotation: 0
+                                }
+                            },
+
+                            y: {
+                                beginAtZero: true,
+
+                                ticks: {
+                                    callback: function(value) {
+                                        if (value >= 1000000) {
+                                            return (
+                                                value / 1000000
+                                            ).toLocaleString("vi-VN") + "tr";
+                                        }
+
+                                        if (value >= 1000) {
+                                            return (
+                                                value / 1000
+                                            ).toLocaleString("vi-VN") + "k";
+                                        }
+
+                                        return value;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            const statusCanvas =
+                document.getElementById("statusChart");
+
+            if (statusCanvas && statusValues.length > 0) {
+                new Chart(statusCanvas, {
+                    type: "doughnut",
+
+                    data: {
+                        labels: statusLabels,
+
+                        datasets: [
+                            {
+                                data: statusValues,
+
+                                backgroundColor: [
+                                    "#111111",
+                                    "#555555",
+                                    "#888888",
+                                    "#bbbbbb",
+                                    "#dddddd",
+                                    "#333333",
+                                    "#777777",
+                                    "#aaaaaa"
+                                ],
+
+                                borderColor: "#ffffff",
+                                borderWidth: 3,
+                                hoverOffset: 8
+                            }
+                        ]
+                    },
+
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: "65%",
+
+                        plugins: {
+                            legend: {
+                                position: "bottom",
+
+                                labels: {
+                                    padding: 15,
+                                    usePointStyle: true,
+                                    boxWidth: 10
+                                }
+                            },
+
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.label +
+                                            ": " +
+                                            context.parsed +
+                                            " đơn";
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+    </script>
+
+</body>
+</html>

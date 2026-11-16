@@ -1,0 +1,1132 @@
+﻿
+@using System
+@using System.Data
+
+@{
+    Layout = null;
+    ViewBag.Title = "Tài khoản của tôi - MINI SHOP & LUXURY";
+
+    string fullName = Convert.ToString(ViewBag.FullName ?? "");
+    string phone = Convert.ToString(ViewBag.Phone ?? "");
+    string email = Convert.ToString(ViewBag.Email ?? "");
+    string address = Convert.ToString(ViewBag.Address ?? "");
+
+    string successMessage = Convert.ToString(TempData["ProfileSuccess"] ?? "");
+    string errorMessage = Convert.ToString(TempData["ProfileError"] ?? "");
+
+    DataTable orders = ViewBag.Orders as DataTable;
+    DataTable details = ViewBag.OrderDetails as DataTable;
+
+    int totalOrders = orders == null ? 0 : orders.Rows.Count;
+    int pendingOrders = 0;
+    int shippingOrders = 0;
+    int completedOrders = 0;
+
+    if (orders != null)
+    {
+        foreach (DataRow item in orders.Rows)
+        {
+            string s = Convert.ToString(item["OrderStatus"])
+                .Trim().ToUpperInvariant();
+
+            if (s == "PENDING" || s == "CHỜ XÁC NHẬN")
+            {
+                pendingOrders++;
+            }
+            else if (s == "SHIPPING" ||
+                     s == "DELIVERING" ||
+                     s == "ĐANG GIAO")
+            {
+                shippingOrders++;
+            }
+            else if (s == "COMPLETED" ||
+                     s == "DELIVERED" ||
+                     s == "ĐÃ GIAO")
+            {
+                completedOrders++;
+            }
+        }
+    }
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>@ViewBag.Title</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f5f5f5;
+            color: #171717;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        button, input, textarea {
+            font-family: inherit;
+        }
+
+        .topbar {
+            background: #111;
+            color: #fff;
+            padding: 22px 6%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        .home-link {
+            font-size: 13px;
+        }
+
+        .heading {
+            text-align: center;
+            padding: 45px 15px 30px;
+        }
+
+            .heading h1 {
+                font-size: 28px;
+                letter-spacing: 2px;
+                font-weight: normal;
+                margin: 0 0 12px;
+            }
+
+            .heading p {
+                color: #777;
+                font-size: 14px;
+            }
+
+        .layout {
+            max-width: 1180px;
+            margin: 0 auto 65px;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 260px minmax(0, 1fr);
+            gap: 25px;
+        }
+
+        .sidebar, .main {
+            background: #fff;
+            border: 1px solid #e5e5e5;
+        }
+
+        .sidebar {
+            padding: 25px 18px;
+            align-self: start;
+        }
+
+        .avatar {
+            width: 75px;
+            height: 75px;
+            border-radius: 50%;
+            background: #111;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            margin: 0 auto 15px;
+        }
+
+        .customer-name {
+            font-size: 17px;
+            font-weight: bold;
+            text-align: center;
+            overflow-wrap: anywhere;
+        }
+
+        .customer-email {
+            font-size: 12px;
+            color: #777;
+            text-align: center;
+            margin: 8px 0 28px;
+            overflow-wrap: anywhere;
+        }
+
+        .menu {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 8px;
+            background: transparent;
+            color: #333;
+            font-size: 14px;
+            border: none;
+            text-align: left;
+            cursor: pointer;
+        }
+
+            .menu:hover {
+                background: #f2f2f2;
+            }
+
+            .menu.active {
+                background: #111;
+                color: #fff;
+            }
+
+        .main {
+            padding: 32px;
+            min-width: 0;
+            min-height: 450px;
+        }
+
+        .section-title {
+            padding-bottom: 18px;
+            margin-bottom: 25px;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+            .section-title h2 {
+                font-size: 22px;
+                font-weight: normal;
+                margin: 0 0 10px;
+            }
+
+            .section-title p {
+                color: #777;
+                font-size: 13px;
+                line-height: 1.7;
+                margin: 0;
+            }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 9px;
+        }
+
+            .field.full {
+                grid-column: 1 / -1;
+            }
+
+            .field label {
+                font-size: 13px;
+                font-weight: bold;
+            }
+
+            .field input, .field textarea {
+                width: 100%;
+                padding: 14px;
+                border: 1px solid #ddd;
+                background: #fafafa;
+                color: #222;
+                font-size: 14px;
+                outline: none;
+            }
+
+                .field input:focus,
+                .field textarea:focus {
+                    border-color: #111;
+                }
+
+            .field textarea {
+                min-height: 100px;
+                resize: vertical;
+            }
+
+        .buttons {
+            margin-top: 27px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 13px 22px;
+            background: #111;
+            border: 1px solid #111;
+            color: #fff;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+            .btn:hover {
+                background: #333;
+            }
+
+        .btn-outline {
+            background: #fff;
+            color: #111;
+        }
+
+            .btn-outline:hover {
+                background: #eee;
+            }
+
+        .message {
+            padding: 14px 17px;
+            margin-bottom: 20px;
+            font-size: 13px;
+        }
+
+        .success {
+            background: #edf8ef;
+            color: #267139;
+            border: 1px solid #b9dfc1;
+        }
+
+        .error {
+            background: #fff0f0;
+            color: #a12828;
+            border: 1px solid #efb8b8;
+        }
+
+        .note {
+            margin-top: 25px;
+            padding: 17px;
+            background: #f7f7f7;
+            color: #777;
+            font-size: 12px;
+            line-height: 1.8;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .stat {
+            background: #fafafa;
+            border: 1px solid #e5e5e5;
+            padding: 18px 10px;
+            text-align: center;
+        }
+
+            .stat strong {
+                display: block;
+                font-size: 25px;
+                margin-bottom: 8px;
+            }
+
+            .stat span {
+                font-size: 11px;
+                color: #777;
+            }
+
+        .order {
+            border: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+
+        .order-header {
+            padding: 20px;
+            background: #fafafa;
+            border-bottom: 1px solid #e5e5e5;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .order-number {
+            font-size: 17px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .order-date {
+            color: #777;
+            font-size: 12px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 8px 11px;
+            font-size: 11px;
+            font-weight: bold;
+            border-radius: 3px;
+        }
+
+        .badge-pending {
+            background: #fff1d4;
+            color: #936100;
+        }
+
+        .badge-confirmed {
+            background: #e6edff;
+            color: #3155a0;
+        }
+
+        .badge-shipping {
+            background: #e5f3ff;
+            color: #17608e;
+        }
+
+        .badge-done {
+            background: #e4f5e8;
+            color: #26713a;
+        }
+
+        .badge-cancel {
+            background: #ffe7e7;
+            color: #a12828;
+        }
+
+        .badge-other {
+            background: #eee;
+            color: #555;
+        }
+
+        .order-content {
+            padding: 22px;
+        }
+
+        .order-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .small-label {
+            color: #888;
+            font-size: 12px;
+            margin-bottom: 7px;
+        }
+
+        .value {
+            font-size: 14px;
+            font-weight: bold;
+            overflow-wrap: anywhere;
+        }
+
+        .total {
+            font-size: 22px;
+        }
+
+        .paid {
+            color: #238344;
+        }
+
+        .unpaid {
+            color: #a96b0c;
+        }
+
+        .order-detail {
+            margin-top: 22px;
+            padding-top: 18px;
+            border-top: 1px solid #eee;
+        }
+
+        .cancel-order-form {
+            margin-top: 18px;
+        }
+
+        .btn-cancel-order {
+            display: inline-block;
+            padding: 12px 20px;
+            background: #fff;
+            border: 1px solid #b12828;
+            color: #a12828;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+            .btn-cancel-order:hover {
+                background: #fff0f0;
+            }
+
+        .order-detail summary {
+            display: inline-block;
+            padding: 13px 22px;
+            background: #fff;
+            border: 1px solid #111;
+            color: #111;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            list-style: none;
+        }
+
+            .order-detail summary::-webkit-details-marker {
+                display: none;
+            }
+
+            .order-detail summary:hover {
+                background: #eee;
+            }
+
+        .detail-body {
+            margin-top: 22px;
+            padding: 20px;
+            background: #fcfcfc;
+            border: 1px solid #eee;
+        }
+
+            .detail-body h3 {
+                margin: 0 0 18px;
+                font-size: 15px;
+            }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        .product-table {
+            width: 100%;
+            min-width: 450px;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+            .product-table th {
+                padding: 12px;
+                background: #f0f0f0;
+                text-align: left;
+            }
+
+            .product-table td {
+                padding: 13px 12px;
+                border-bottom: 1px solid #e5e5e5;
+            }
+
+                .product-table th:last-child,
+                .product-table td:last-child {
+                    text-align: right;
+                }
+
+        .delivery {
+            margin-top: 22px;
+            padding: 18px;
+            background: #f3f3f3;
+            font-size: 13px;
+            line-height: 2;
+            overflow-wrap: anywhere;
+        }
+
+        .empty {
+            padding: 55px 20px;
+            border: 1px dashed #ddd;
+            text-align: center;
+        }
+
+            .empty h3 {
+                font-size: 18px;
+                font-weight: normal;
+            }
+
+            .empty p {
+                color: #777;
+                font-size: 13px;
+                margin-bottom: 25px;
+            }
+
+        .footer {
+            background: #111;
+            color: #aaa;
+            text-align: center;
+            padding: 25px;
+            font-size: 12px;
+        }
+
+        /* Hai tab không cần JavaScript */
+
+        .account-tab {
+            position: absolute;
+            opacity: 0;
+            width: 1px;
+            height: 1px;
+        }
+
+        .profile-panel,
+        .orders-panel {
+            display: none;
+        }
+
+        #tab-profile:checked ~ .layout .profile-panel {
+            display: block;
+        }
+
+        #tab-orders:checked ~ .layout .orders-panel {
+            display: block;
+        }
+
+        #tab-profile:checked ~ .layout .profile-menu {
+            background: #111;
+            color: #fff;
+        }
+
+        #tab-orders:checked ~ .layout .orders-menu {
+            background: #111;
+            color: #fff;
+        }
+
+        @@media (max-width: 900px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @@media (max-width: 550px) {
+            .topbar {
+                padding: 18px;
+            }
+
+            .logo {
+                font-size: 15px;
+            }
+
+            .main {
+                padding: 20px 15px;
+            }
+
+            .heading h1 {
+                font-size: 22px;
+            }
+
+            .form-grid,
+            .order-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .field.full {
+                grid-column: auto;
+            }
+
+            .stats {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .order-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="topbar">
+        <a class="logo" href="@Url.Action("Index", "Home")">
+            MINI SHOP & LUXURY
+        </a>
+
+        <a class="home-link" href="@Url.Action("Index", "Home")">
+            TRỞ VỀ TRANG CHỦ
+        </a>
+    </header>
+
+    <div class="heading">
+        <h1>TÀI KHOẢN CỦA TÔI</h1>
+        <p>Quản lý thông tin cá nhân và lịch sử đơn hàng</p>
+    </div>
+
+    <input class="account-tab"
+           type="radio"
+           name="accountTab"
+           id="tab-profile"
+           checked="checked" />
+
+    <input class="account-tab"
+           type="radio"
+           name="accountTab"
+           id="tab-orders" />
+
+    <div class="layout">
+
+        <aside class="sidebar">
+
+            <div class="avatar">♙</div>
+
+            <div class="customer-name">@fullName</div>
+            <div class="customer-email">@email</div>
+
+            <label for="tab-profile"
+                   class="menu profile-menu">
+                THÔNG TIN CÁ NHÂN
+            </label>
+
+            <label for="tab-orders"
+                   class="menu orders-menu">
+                ĐƠN HÀNG CỦA TÔI (@totalOrders)
+            </label>
+
+            <a class="menu"
+               href="@Url.Action("Index", "Home")">
+                TIẾP TỤC MUA SẮM
+            </a>
+
+        </aside>
+
+        <main class="main">
+
+            @if (!string.IsNullOrEmpty(successMessage))
+            {
+                <div class="message success">
+                    @successMessage
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="message error">
+                    @errorMessage
+                </div>
+            }
+
+            <section class="profile-panel">
+
+                <div class="section-title">
+                    <h2>THÔNG TIN CÁ NHÂN</h2>
+                    <p>
+                        Bạn có thể chỉnh sửa họ tên, số điện thoại,
+                        email và địa chỉ giao hàng.
+                    </p>
+                </div>
+
+                @using (Html.BeginForm(
+                    "Update",
+                    "CustomerProfile",
+                    FormMethod.Post,
+                    new { id = "profileForm" }))
+                {
+                    @Html.AntiForgeryToken()
+
+                    <div class="form-grid">
+
+                        <div class="field full">
+                            <label for="fullName">
+                                Họ và tên *
+                            </label>
+
+                            <input id="fullName"
+                                   name="fullName"
+                                   type="text"
+                                   maxlength="100"
+                                   value="@fullName"
+                                   required="required" />
+                        </div>
+
+                        <div class="field">
+                            <label for="phone">
+                                Số điện thoại *
+                            </label>
+
+                            <input id="phone"
+                                   name="phone"
+                                   type="tel"
+                                   value="@phone"
+                                   maxlength="10"
+                                   pattern="[0-9]{10}"
+                                   required="required" />
+                        </div>
+
+                        <div class="field">
+                            <label for="email">
+                                Email *
+                            </label>
+
+                            <input id="email"
+                                   name="email"
+                                   type="email"
+                                   value="@email"
+                                   maxlength="254"
+                                   required="required" />
+                        </div>
+
+                        <div class="field full">
+                            <label for="address">
+                                Địa chỉ giao hàng
+                            </label>
+
+                            <textarea id="address"
+                                      name="address"
+                                      maxlength="500">@address</textarea>
+                        </div>
+
+                    </div>
+
+                    <div class="buttons">
+                        <button type="submit" class="btn">
+                            LƯU THAY ĐỔI
+                        </button>
+                    </div>
+                }
+
+                <div class="note">
+                    Thông tin cá nhân sẽ được cập nhật khi bạn
+                    nhấn LƯU THAY ĐỔI.
+
+                    <div>
+                        Các đơn hàng đã đặt vẫn giữ thông tin
+                        giao hàng tại thời điểm mua hàng.
+                    </div>
+                </div>
+
+            </section>
+
+            <section class="orders-panel">
+
+                <div class="section-title">
+                    <h2>ĐƠN HÀNG CỦA TÔI</h2>
+                    <p>
+                        Theo dõi trạng thái giao hàng,
+                        thanh toán và sản phẩm đã đặt.
+                    </p>
+                </div>
+
+                <div class="stats">
+
+                    <div class="stat">
+                        <strong>@totalOrders</strong>
+                        <span>TỔNG ĐƠN</span>
+                    </div>
+
+                    <div class="stat">
+                        <strong>@pendingOrders</strong>
+                        <span>CHỜ XÁC NHẬN</span>
+                    </div>
+
+                    <div class="stat">
+                        <strong>@shippingOrders</strong>
+                        <span>ĐANG GIAO</span>
+                    </div>
+
+                    <div class="stat">
+                        <strong>@completedOrders</strong>
+                        <span>ĐÃ GIAO</span>
+                    </div>
+
+                </div>
+
+                @if (orders == null || orders.Rows.Count == 0)
+                {
+                    <div class="empty">
+
+                        <h3>CHƯA CÓ ĐƠN HÀNG</h3>
+
+                        <p>
+                            Tài khoản này chưa có đơn hàng nào.
+                        </p>
+
+                        <a class="btn"
+                           href="@Url.Action("Index", "Home")">
+                            MUA SẮM NGAY
+                        </a>
+
+                    </div>
+                }
+                else
+                {
+                    foreach (DataRow order in orders.Rows)
+                    {
+                        int orderId = Convert.ToInt32(order["OrderId"]);
+
+                        string customerName =
+                            Convert.ToString(order["CustomerName"]);
+
+                        string orderPhone =
+                            Convert.ToString(order["Phone"]);
+
+                        string orderAddress =
+                            Convert.ToString(order["Address"]);
+
+                        decimal total =
+                            Convert.ToDecimal(order["TotalAmount"]);
+
+                        DateTime created =
+                            Convert.ToDateTime(order["CreatedAt"]);
+
+                        string rawStatus =
+                            Convert.ToString(order["OrderStatus"])
+                            .Trim().ToUpperInvariant();
+
+                        string statusText = rawStatus;
+                        string badgeClass = "badge-other";
+
+                        if (rawStatus == "PENDING" ||
+                            rawStatus == "CHỜ XÁC NHẬN")
+                        {
+                            statusText = "CHỜ XÁC NHẬN";
+                            badgeClass = "badge-pending";
+                        }
+                        else if (rawStatus == "CONFIRMED" ||
+                                 rawStatus == "ĐÃ XÁC NHẬN")
+                        {
+                            statusText = "ĐÃ XÁC NHẬN";
+                            badgeClass = "badge-confirmed";
+                        }
+                        else if (rawStatus == "SHIPPING" ||
+                                 rawStatus == "DELIVERING" ||
+                                 rawStatus == "ĐANG GIAO")
+                        {
+                            statusText = "ĐANG GIAO";
+                            badgeClass = "badge-shipping";
+                        }
+                        else if (rawStatus == "COMPLETED" ||
+                                 rawStatus == "DELIVERED" ||
+                                 rawStatus == "ĐÃ GIAO")
+                        {
+                            statusText = "ĐÃ GIAO";
+                            badgeClass = "badge-done";
+                        }
+                        else if (rawStatus == "CANCELLED" ||
+                                 rawStatus == "CANCELED" ||
+                                 rawStatus == "ĐÃ HỦY")
+                        {
+                            statusText = "ĐÃ HỦY";
+                            badgeClass = "badge-cancel";
+                        }
+
+                        string method =
+                            Convert.ToString(order["PaymentMethod"])
+                            .Trim().ToUpperInvariant();
+
+                        string methodText = method == "COD"
+                            ? "Thanh toán khi nhận hàng (COD)"
+                            : method == "BANK"
+                                ? "Chuyển khoản VietQR BIDV"
+                                : method;
+
+                        string payment =
+                            Convert.ToString(order["PaymentStatus"])
+                            .Trim().ToUpperInvariant();
+
+                        bool paid =
+                            payment == "PAID" ||
+                            payment == "COMPLETED" ||
+                            payment == "ĐÃ THANH TOÁN";
+
+                        string paymentText = paid
+                            ? "Đã thanh toán"
+                            : "Chưa xác nhận thanh toán";
+
+                        <article class="order">
+
+                            <div class="order-header">
+
+                                <div>
+                                    <div class="order-number">
+                                        ĐƠN HÀNG #@orderId
+                                    </div>
+
+                                    <div class="order-date">
+                                        @created.ToString("dd/MM/yyyy HH:mm")
+                                    </div>
+                                </div>
+
+                                <span class="badge @badgeClass">
+                                    @statusText
+                                </span>
+
+                            </div>
+
+                            <div class="order-content">
+
+                                <div class="order-grid">
+
+                                    <div>
+                                        <div class="small-label">
+                                            Phương thức thanh toán
+                                        </div>
+
+                                        <div class="value">
+                                            @methodText
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <div class="small-label">
+                                            Trạng thái thanh toán
+                                        </div>
+
+                                        <div class="value @(paid ? "paid" : "unpaid")">
+                                            @paymentText
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <div class="small-label">
+                                            Người nhận
+                                        </div>
+
+                                        <div class="value">
+                                            @customerName
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <div class="small-label">
+                                            Tổng tiền
+                                        </div>
+
+                                        <div class="value total">
+                                            @total.ToString("N0") ₫
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <details class="order-detail">
+
+                                    <summary>
+                                        XEM / ẨN CHI TIẾT ĐƠN HÀNG
+                                    </summary>
+
+                                    <div class="detail-body">
+
+                                        <h3>SẢN PHẨM ĐÃ ĐẶT</h3>
+
+                                        <div class="table-wrap">
+
+                                            <table class="product-table">
+
+                                                <thead>
+                                                    <tr>
+                                                        <th>Sản phẩm</th>
+                                                        <th>Số lượng</th>
+                                                        <th>Đơn giá</th>
+                                                        <th>Thành tiền</th>
+                                                    </tr>
+                                                </thead>
+
+                                                <tbody>
+
+                                                    @if (details != null)
+                                                    {
+                                                        foreach (DataRow d in details.Rows)
+                                                        {
+                                                            if (Convert.ToInt32(d["OrderId"]) == orderId)
+                                                            {
+                                                                string productName =
+                                                                    d["ProductName"] == DBNull.Value
+                                                                    ? "Sản phẩm #" + Convert.ToString(d["ProductId"])
+                                                                    : Convert.ToString(d["ProductName"]);
+
+                                                                int quantity =
+                                                                    Convert.ToInt32(d["Quantity"]);
+
+                                                                decimal price =
+                                                                    Convert.ToDecimal(d["UnitPrice"]);
+
+                                                                decimal lineTotal =
+                                                                    Convert.ToDecimal(d["LineTotal"]);
+
+                                                                <tr>
+                                                                    <td>@productName</td>
+                                                                    <td>@quantity</td>
+                                                                    <td>@price.ToString("N0") ₫</td>
+                                                                    <td>@lineTotal.ToString("N0") ₫</td>
+                                                                </tr>
+                                                            }
+                                                        }
+                                                    }
+
+                                                </tbody>
+
+                                            </table>
+
+                                        </div>
+
+                                        <div class="delivery">
+
+                                            <strong>
+                                                THÔNG TIN GIAO HÀNG
+                                            </strong>
+
+                                            <div>
+                                                <strong>Người nhận:</strong>
+                                                @customerName
+                                            </div>
+
+                                            <div>
+                                                <strong>Số điện thoại:</strong>
+                                                @orderPhone
+                                            </div>
+
+                                            <div>
+                                                <strong>Địa chỉ:</strong>
+                                                @orderAddress
+                                            </div>
+
+                                            <div>
+                                                <strong>Thanh toán:</strong>
+                                                @methodText
+                                            </div>
+
+                                            <div>
+                                                <strong>Trạng thái đơn:</strong>
+                                                @statusText
+                                            </div>
+
+                                            <div>
+                                                <strong>Trạng thái thanh toán:</strong>
+                                                @paymentText
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                </details>
+
+                                @* Chỉ hiện nút hủy khi đơn còn chờ xác nhận
+                                    và chưa được thanh toán. *@
+                                @if ((rawStatus == "PENDING" ||
+                                      rawStatus == "CHỜ XÁC NHẬN") && !paid)
+                                {
+                                    using (Html.BeginForm(
+                                        "CancelOrder",
+                                        "CustomerProfile",
+                                        new { id = orderId },
+                                        FormMethod.Post,
+                                        new
+                                        {
+                                            @class = "cancel-order-form",
+                                            onsubmit = "return confirm('Bạn có chắc chắn muốn hủy đơn hàng này không?');"
+                                        }))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn-cancel-order">
+                                            HỦY ĐƠN HÀNG
+                                        </button>
+                                    }
+                                }
+
+                            </div>
+
+                        </article>
+                    }
+                }
+
+            </section>
+
+        </main>
+
+    </div>
+
+    <footer class="footer">
+        © @DateTime.Now.Year MINI SHOP & LUXURY.
+        ALL RIGHTS RESERVED.
+    </footer>
+
+</body>
+</html>

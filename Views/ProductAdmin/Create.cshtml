@@ -1,0 +1,535 @@
+﻿
+@using System
+@using System.Data
+@{
+    ViewBag.Title = "Thêm sản phẩm";
+    Layout = null;
+    DataTable categories = ViewBag.Categories as DataTable;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Thêm sản phẩm - MINI SHOP &amp; LUXURY</title>
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            color: #111;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            height: 100vh;
+            padding: 28px 18px;
+            background: #101010;
+            color: #fff;
+        }
+
+        .brand {
+            text-align: center;
+            font-size: 21px;
+            font-weight: bold;
+            line-height: 1.5;
+            letter-spacing: 2px;
+            margin-bottom: 40px;
+        }
+
+            .brand span {
+                display: block;
+                color: #bbb;
+                font-size: 12px;
+                font-weight: normal;
+                letter-spacing: 1px;
+            }
+
+        .menu a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+            color: #ddd;
+            text-decoration: none;
+            border-radius: 7px;
+        }
+
+            .menu a:hover,
+            .menu a.active {
+                background: #fff;
+                color: #111;
+            }
+
+        .menu .logout-link {
+            border-top: 1px solid #444;
+            border-radius: 0;
+            margin-top: 20px;
+            padding-top: 20px;
+        }
+
+        .main {
+            margin-left: 250px;
+            padding: 35px;
+        }
+
+        .page-header {
+            margin-bottom: 25px;
+        }
+
+            .page-header h1 {
+                margin: 0 0 8px;
+                font-size: 28px;
+            }
+
+            .page-header p {
+                margin: 0;
+                color: #777;
+            }
+
+        .form-card {
+            background: #fff;
+            border: 1px solid #e5e5e5;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 850px;
+        }
+
+        .form-group {
+            margin-bottom: 22px;
+        }
+
+            .form-group label {
+                display: block;
+                font-size: 14px;
+                font-weight: bold;
+                margin-bottom: 9px;
+            }
+
+        .form-control {
+            width: 100%;
+            padding: 13px 15px;
+            border: 1px solid #ddd;
+            border-radius: 7px;
+            font-size: 15px;
+            font-family: Arial, sans-serif;
+        }
+
+            .form-control:focus {
+                outline: none;
+                border-color: #111;
+            }
+
+        textarea.form-control {
+            min-height: 110px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .hint {
+            font-size: 12px;
+            color: #777;
+            margin-top: 8px;
+        }
+
+        .upload-area {
+            border: 2px dashed #bbb;
+            border-radius: 12px;
+            padding: 28px;
+            text-align: center;
+            background: #fafafa;
+        }
+
+        .upload-icon {
+            font-size: 38px;
+            color: #333;
+            margin-bottom: 12px;
+        }
+
+        .upload-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .upload-button {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #111;
+            color: #fff;
+            border-radius: 7px;
+            cursor: pointer;
+            margin-top: 12px;
+        }
+
+            .upload-button:hover {
+                background: #333;
+            }
+
+        .file-input {
+            display: none;
+        }
+
+        .preview-container {
+            display: none;
+            margin-top: 22px;
+            text-align: center;
+        }
+
+        .preview-image {
+            max-width: 100%;
+            width: 260px;
+            height: 260px;
+            object-fit: contain;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #fff;
+        }
+
+        .file-name {
+            margin-top: 10px;
+            color: #555;
+            font-size: 13px;
+            overflow-wrap: anywhere;
+        }
+
+        .remove-image {
+            margin-top: 12px;
+            background: #fff;
+            border: 1px solid #c62828;
+            color: #c62828;
+            padding: 10px 18px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 30px;
+        }
+
+        .btn-save {
+            background: #111;
+            color: #fff;
+            border: 1px solid #111;
+            border-radius: 7px;
+            padding: 14px 24px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-cancel {
+            display: inline-flex;
+            align-items: center;
+            background: #fff;
+            color: #111;
+            border: 1px solid #111;
+            border-radius: 7px;
+            padding: 14px 24px;
+            text-decoration: none;
+            font-size: 15px;
+        }
+
+        .validation {
+            color: #c62828;
+            margin-bottom: 15px;
+        }
+
+        @@media (max-width: 800px) {
+            .sidebar {
+                position: static;
+                width: 100%;
+                height: auto;
+            }
+
+            .main {
+                margin-left: 0;
+                padding: 20px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <aside class="sidebar">
+        <div class="brand">
+            MINI SHOP
+            <br />
+            &amp; LUXURY
+            <span>ADMIN PANEL</span>
+        </div>
+
+        <nav class="menu">
+            <a href="@Url.Action("Index", "Admin")"><i class="fa-solid fa-gauge-high"></i> Tổng quan</a>
+            <a href="@Url.Action("Index", "CategoryAdmin")"><i class="fa-solid fa-list"></i> Quản lý danh mục</a>
+            <a class="active" href="@Url.Action("Index", "ProductAdmin")"><i class="fa-solid fa-box"></i> Quản lý sản phẩm</a>
+            <a href="@Url.Action("Index", "OrderAdmin")"><i class="fa-solid fa-receipt"></i> Quản lý đơn hàng</a>
+            <a href="@Url.Action("Index", "Home")"><i class="fa-solid fa-store"></i> Đi đến trang bán hàng</a>
+            <a class="logout-link" href="@Url.Action("Logout", "Account")"><i class="fa-solid fa-right-from-bracket"></i> Đăng xuất</a>
+        </nav>
+    </aside>
+
+    <main class="main">
+        <div class="page-header">
+            <h1>Thêm sản phẩm mới</h1>
+            <p>Nhập thông tin và chọn ảnh từ máy tính.</p>
+        </div>
+
+        <div class="form-card">
+
+            @using (Html.BeginForm(
+                "Create",
+                "ProductAdmin",
+                FormMethod.Post,
+                new { enctype = "multipart/form-data" }))
+            {
+                @Html.AntiForgeryToken()
+
+                @Html.ValidationSummary(
+                              false, "",
+                              new { @class = "validation" })
+
+                <div class="form-group">
+                    <label for="productName">
+                        Tên sản phẩm *
+                    </label>
+
+                    <input class="form-control"
+                           type="text"
+                           id="productName"
+                           name="productName"
+                           maxlength="200"
+                           required
+                           placeholder="Ví dụ: Áo sơ mi cao cấp" />
+                </div>
+
+                <div class="form-group">
+                    <label for="categoryId">
+                        Danh mục *
+                    </label>
+
+                    <select class="form-control"
+                            id="categoryId"
+                            name="categoryId"
+                            required>
+
+                        <option value="">
+                            -- Chọn danh mục --
+                        </option>
+
+                        @if (categories != null)
+                        {
+                            foreach (DataRow row in categories.Rows)
+                            {
+                                <option value="@row["CategoryId"]">
+                                    @row["CategoryName"]
+                                </option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="form-row">
+
+                    <div class="form-group">
+                        <label for="price">
+                            Giá bán (VNĐ) *
+                        </label>
+
+                        <input class="form-control"
+                               type="number"
+                               id="price"
+                               name="price"
+                               min="0"
+                               step="1"
+                               required
+                               placeholder="Ví dụ: 450000" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="stockQuantity">
+                            Số lượng tồn kho *
+                        </label>
+
+                        <input class="form-control"
+                               type="number"
+                               id="stockQuantity"
+                               name="stockQuantity"
+                               min="0"
+                               step="1"
+                               value="0"
+                               required />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        Hình ảnh sản phẩm
+                    </label>
+
+                    <div class="upload-area">
+
+                        <div class="upload-icon">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                        </div>
+
+                        <div class="upload-title">
+                            Tải ảnh sản phẩm lên
+                        </div>
+
+                        <p class="hint">
+                            Chấp nhận JPG, PNG, WEBP.
+                            Dung lượng tối đa 5MB.
+                        </p>
+
+                        <input type="file"
+                               id="imageFile"
+                               name="imageFile"
+                               class="file-input"
+                               accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                               onchange="previewSelectedImage(this)" />
+
+                        <label for="imageFile"
+                               class="upload-button">
+                            <i class="fa-solid fa-image"></i>
+                            Chọn ảnh từ máy tính
+                        </label>
+
+                        <div class="preview-container"
+                             id="previewContainer">
+
+                            <img id="previewImage"
+                                 class="preview-image"
+                                 alt="Xem trước ảnh sản phẩm" />
+
+                            <div class="file-name"
+                                 id="fileName"></div>
+
+                            <button type="button"
+                                    class="remove-image"
+                                    onclick="removeSelectedImage()">
+                                <i class="fa-solid fa-trash"></i>
+                                Xóa ảnh đã chọn
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">
+                        Mô tả sản phẩm
+                    </label>
+
+                    <textarea class="form-control"
+                              id="description"
+                              name="description"
+                              placeholder="Nhập mô tả sản phẩm..."></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button class="btn-save"
+                            type="submit">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        Lưu sản phẩm
+                    </button>
+
+                    <a class="btn-cancel"
+                       href="@Url.Action("Index", "ProductAdmin")">
+                        Hủy
+                    </a>
+                </div>
+            }
+        </div>
+    </main>
+
+    <script>
+                        function previewSelectedImage(input) {
+                            var previewContainer =
+                                document.getElementById("previewContainer");
+
+                            var previewImage =
+                                document.getElementById("previewImage");
+
+                            var fileName =
+                                document.getElementById("fileName");
+
+                            if (!input.files || input.files.length === 0) {
+                                removeSelectedImage();
+                                return;
+                            }
+
+                            var file = input.files[0];
+
+                            var allowedTypes = [
+                                "image/jpeg",
+                                "image/png",
+                                "image/webp"
+                            ];
+
+                            if (allowedTypes.indexOf(file.type) === -1) {
+                                alert("Chỉ chấp nhận ảnh JPG, PNG hoặc WEBP.");
+                                removeSelectedImage();
+                                return;
+                            }
+
+                            if (file.size > 5 * 1024 * 1024) {
+                                alert("Ảnh không được lớn hơn 5MB.");
+                                removeSelectedImage();
+                                return;
+                            }
+
+                            var reader = new FileReader();
+
+                            reader.onload = function (event) {
+                                previewImage.src = event.target.result;
+                                previewContainer.style.display = "block";
+                                fileName.textContent = file.name;
+                            };
+
+                            reader.readAsDataURL(file);
+                        }
+
+                        function removeSelectedImage() {
+                            var input =
+                                document.getElementById("imageFile");
+
+                            var previewContainer =
+                                document.getElementById("previewContainer");
+
+                            var previewImage =
+                                document.getElementById("previewImage");
+
+                            var fileName =
+                                document.getElementById("fileName");
+
+                            input.value = "";
+                            previewImage.removeAttribute("src");
+                            fileName.textContent = "";
+                            previewContainer.style.display = "none";
+                        }
+    </script>
+</body>
+</html>
